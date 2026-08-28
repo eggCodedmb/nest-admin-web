@@ -1,0 +1,19 @@
+// 侧边栏与系统主色调变量
+$menuBg: #304156;
+$menuTextColor: #bfcbd9;
+$menuActiveTextColor: #409eff;
+$menuActiveBg: #263445;
+$menuHover: #263445;
+
+$sideBarWidth: 220px;
+$hideSidebarWidth: 64px;
+
+:export {
+  menuBg: $menuBg;
+  menuTextColor: $menuTextColor;
+  menuActiveTextColor: $menuActiveTextColor;
+  menuActiveBg: $menuActiveBg;
+  menuHover: $menuHover;
+  sideBarWidth: $sideBarWidth;
+  hideSidebarWidth: $hideSidebarWidth;
+}
