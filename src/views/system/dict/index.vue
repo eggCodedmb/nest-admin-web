@@ -39,7 +39,7 @@
       </template>
 
       <template #dictType="{ row }">
-        <el-link type="primary" :underline="false" @click="handleOpenDataDrawer(row)">
+        <el-link type="primary" underline="never" @click="handleOpenDataDrawer(row)">
           {{ row.dictType }}
         </el-link>
       </template>
