@@ -8,9 +8,7 @@
     </el-tooltip>
     <el-popover placement="bottom-end" :width="220" trigger="click" popper-class="column-setting-popover">
       <template #reference>
-        <el-tooltip content="显隐列设置" placement="top">
-          <el-button circle icon="Menu" />
-        </el-tooltip>
+        <el-button circle icon="Menu" title="显隐列设置" />
       </template>
       <div class="column-setting-content">
         <div class="column-setting-header flex justify-between items-center pb-2 mb-2 border-b border-gray-100 dark:border-gray-700">
