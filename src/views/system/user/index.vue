@@ -59,10 +59,10 @@
         <!-- 状态 Switch 切换 -->
         <template #status="{ row }">
           <el-switch
-            :model-value="Number(row.status)"
+            :model-value="Number(row?.status) === 1 ? 1 : 0"
             :active-value="1"
             :inactive-value="0"
-            :disabled="Number(row.id) === 1"
+            :disabled="Number(row?.id) === 1"
             :before-change="() => handleBeforeStatusChange(row)"
           />
         </template>
