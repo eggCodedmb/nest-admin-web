@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
     ],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'src'),
+        '@': path.resolve(import.meta.dirname, 'src'),
       },
     },
     server: {
@@ -35,10 +35,18 @@ export default defineConfig(({ mode }) => {
       chunkSizeWarningLimit: 1500,
       rollupOptions: {
         output: {
-          manualChunks: {
-            vue: ['vue', 'vue-router', 'pinia'],
-            elementPlus: ['element-plus', '@element-plus/icons-vue'],
-            echarts: ['echarts'],
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('vue') || id.includes('pinia')) {
+                return 'vue';
+              }
+              if (id.includes('element-plus') || id.includes('@element-plus')) {
+                return 'elementPlus';
+              }
+              if (id.includes('echarts') || id.includes('zrender')) {
+                return 'echarts';
+              }
+            }
           },
         },
       },
