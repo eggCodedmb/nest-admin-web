@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia';
+import { type LanguageType, getInitialLanguage, changeI18nLanguage } from '@/locales';
+import { type ThemeMode, getInitialTheme, applyTheme } from '@/utils/theme';
 
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -8,6 +10,8 @@ export const useAppStore = defineStore('app', {
     },
     device: 'desktop',
     size: localStorage.getItem('size') || 'default',
+    language: getInitialLanguage() as LanguageType,
+    theme: getInitialTheme() as ThemeMode,
   }),
   actions: {
     toggleSideBar() {
@@ -30,6 +34,18 @@ export const useAppStore = defineStore('app', {
     setSize(size: string) {
       this.size = size;
       localStorage.setItem('size', size);
+    },
+    setLanguage(lang: LanguageType) {
+      this.language = lang;
+      changeI18nLanguage(lang);
+    },
+    setTheme(theme: ThemeMode) {
+      this.theme = theme;
+      applyTheme(theme);
+    },
+    toggleTheme() {
+      const targetTheme: ThemeMode = this.theme === 'dark' ? 'light' : 'dark';
+      this.setTheme(targetTheme);
     },
   },
 });

@@ -1,13 +1,19 @@
 <template>
   <div class="login-container flex items-center justify-center min-h-screen">
+    <!-- 右上角快捷工具栏（语言切换与主题切换） -->
+    <div class="login-tools absolute top-5 right-5 flex items-center gap-3 z-10 p-2 rounded-xl bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-white/10">
+      <LangSelect />
+      <ThemeSwitch />
+    </div>
+
     <div class="login-card w-100 p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800">
       <!-- 标题与 Logo -->
       <div class="text-center mb-8">
         <div class="inline-flex p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl text-primary mb-3">
           <el-icon :size="36"><Management /></el-icon>
         </div>
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Nest Admin</h2>
-        <p class="text-sm text-gray-500 mt-1">企业级中后台权限管理系统</p>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">{{ $t('login.title') }}</h2>
+        <p class="text-sm text-gray-500 mt-1">{{ $t('login.subTitle') }}</p>
       </div>
 
       <!-- 登录表单 -->
@@ -21,7 +27,7 @@
         <el-form-item prop="username">
           <el-input
             v-model="loginForm.username"
-            placeholder="账号 (admin)"
+            :placeholder="$t('login.usernamePlaceholder')"
             prefix-icon="User"
             clearable
           />
@@ -31,7 +37,7 @@
           <el-input
             v-model="loginForm.password"
             type="password"
-            placeholder="密码 (admin123)"
+            :placeholder="$t('login.passwordPlaceholder')"
             prefix-icon="Lock"
             show-password
             clearable
@@ -42,14 +48,14 @@
           <div class="flex gap-3 w-full">
             <el-input
               v-model="loginForm.code"
-              placeholder="图形验证码"
+              :placeholder="$t('login.captchaPlaceholder')"
               prefix-icon="Key"
               class="flex-1"
               maxlength="4"
             />
             <div
-              class="captcha-img shrink-0 cursor-pointer rounded-lg overflow-hidden border border-gray-200"
-              title="点击刷新验证码"
+              class="captcha-img shrink-0 cursor-pointer rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700"
+              :title="$t('login.captchaTips')"
               @click="fetchCaptcha"
               v-html="captchaSvg"
             />
@@ -57,8 +63,8 @@
         </el-form-item>
 
         <div class="flex justify-between items-center mb-6">
-          <el-checkbox v-model="rememberMe">记住密码</el-checkbox>
-          <el-link type="primary" underline="never">忘记密码？</el-link>
+          <el-checkbox v-model="rememberMe">{{ $t('login.rememberMe') }}</el-checkbox>
+          <el-link type="primary" underline="never">{{ $t('login.forgotPassword') }}</el-link>
         </div>
 
         <el-button
@@ -67,7 +73,7 @@
           :loading="loading"
           @click="handleLogin"
         >
-          登 录
+          {{ loading ? $t('login.loggingIn') : $t('login.loginBtn') }}
         </el-button>
       </el-form>
     </div>
@@ -75,13 +81,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { getCaptcha } from '@/api/auth';
 import { useUserStore } from '@/store/modules/user';
+import LangSelect from '@/components/LangSelect/index.vue';
+import ThemeSwitch from '@/components/ThemeSwitch/index.vue';
 
+const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
@@ -99,11 +109,11 @@ const loginForm = reactive({
   uuid: '',
 });
 
-const loginRules: FormRules = {
-  username: [{ required: true, message: '请输入用户账号', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入登录密码', trigger: 'blur' }],
-  code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
-};
+const loginRules = computed<FormRules>(() => ({
+  username: [{ required: true, message: t('login.usernameRequired'), trigger: 'blur' }],
+  password: [{ required: true, message: t('login.passwordRequired'), trigger: 'blur' }],
+  code: [{ required: true, message: t('login.captchaRequired'), trigger: 'blur' }],
+}));
 
 const fetchCaptcha = async () => {
   try {
@@ -122,7 +132,7 @@ const handleLogin = async () => {
     loading.value = true;
     try {
       await userStore.login(loginForm);
-      ElMessage.success('登录成功，欢迎回来！');
+      ElMessage.success(t('login.loginSuccess'));
       const redirect = route.query.redirect ? String(route.query.redirect) : '/';
       router.push(redirect);
     } catch (error) {

@@ -1,14 +1,14 @@
 <template>
   <div class="right-toolbar-container flex items-center gap-2">
-    <el-tooltip :content="showSearch ? '隐藏搜索' : '显示搜索'" placement="top">
+    <el-tooltip :content="showSearch ? $t('table.hideSearch') : $t('table.showSearch')" placement="top">
       <el-button circle icon="Search" @click="toggleSearch" />
     </el-tooltip>
-    <el-tooltip content="刷新表格" placement="top">
+    <el-tooltip :content="$t('table.refreshTable')" placement="top">
       <el-button circle icon="Refresh" @click="refresh" />
     </el-tooltip>
     <el-popover placement="bottom-end" :width="220" trigger="click" popper-class="column-setting-popover">
       <template #reference>
-        <el-button circle icon="Menu" title="显隐列设置" />
+        <el-button circle icon="Menu" :title="$t('table.columnSetting')" />
       </template>
       <div class="column-setting-content">
         <div class="column-setting-header flex justify-between items-center pb-2 mb-2 border-b border-gray-100 dark:border-gray-700">
@@ -17,10 +17,10 @@
             :indeterminate="isIndeterminate"
             @change="handleCheckAllChange"
           >
-            列显隐 ({{ checkedCount }}/{{ filterColumns.length }})
+            {{ $t('table.columnVisibility') }} ({{ checkedCount }}/{{ filterColumns.length }})
           </el-checkbox>
           <el-button link type="primary" size="small" @click="handleReset">
-            重置
+            {{ $t('table.resetColumns') }}
           </el-button>
         </div>
         <div class="column-checkbox-list flex flex-col gap-1 max-h-60 overflow-y-auto">

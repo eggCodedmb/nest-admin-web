@@ -8,7 +8,7 @@
         class="tags-view-item"
         :class="{ active: isActive(tag) }"
       >
-        <span class="tag-title">{{ tag.title }}</span>
+        <span class="tag-title">{{ tRouteTitle(tag.title) }}</span>
         <el-icon v-if="!isAffix(tag)" class="close-icon" @click.prevent.stop="closeSelectedTag(tag)">
           <Close />
         </el-icon>
@@ -22,6 +22,7 @@ import { computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useTagsViewStore, TagView } from '@/store/modules/tagsView';
 import { usePermissionStore } from '@/store/modules/permission';
+import { tRouteTitle } from '@/utils/i18n';
 
 const route = useRoute();
 const router = useRouter();

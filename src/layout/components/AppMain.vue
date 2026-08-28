@@ -25,6 +25,7 @@ const cachedViews = computed(() => tagsViewStore.cachedViews);
   position: relative;
   overflow: hidden;
   padding: 16px;
-  background-color: #f0f2f5;
+  background-color: var(--el-bg-color-page, #f0f2f5);
+  transition: background-color 0.28s;
 }
 </style>

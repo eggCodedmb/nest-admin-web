@@ -5,8 +5,8 @@
       <el-menu
         :default-active="activeMenu"
         :collapse="isCollapse"
-        background-color="#304156"
-        text-color="#bfcbd9"
+        :background-color="isDark ? '#18181c' : '#304156'"
+        :text-color="isDark ? '#c0c4cc' : '#bfcbd9'"
         active-text-color="#409EFF"
         :unique-opened="true"
         :collapse-transition="false"
@@ -37,10 +37,11 @@ const permissionStore = usePermissionStore();
 
 const sidebarRouters = computed(() => permissionStore.sidebarRouters);
 const isCollapse = computed(() => !appStore.sidebar.opened);
+const isDark = computed(() => appStore.theme === 'dark');
 
 const activeMenu = computed(() => {
   const { meta, path } = route;
-  if (meta.activeMenu) {
+  if (meta?.activeMenu) {
     return String(meta.activeMenu);
   }
   return path;

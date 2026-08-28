@@ -1,0 +1,81 @@
+// 暗黑模式全局样式适配
+
+html.dark {
+  color-scheme: dark;
+  background-color: #141414;
+  color: #e5eaf3;
+
+  #app {
+    .main-container {
+      background-color: #141414;
+    }
+
+    .sidebar-container {
+      background-color: #18181c;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.4);
+
+      .el-menu {
+        background-color: #18181c;
+      }
+    }
+
+    .sidebar-logo-container {
+      background-color: #18181c;
+      border-bottom: 1px solid #28282c;
+    }
+
+    .app-main {
+      background-color: #141414 !important;
+    }
+  }
+
+  .navbar {
+    background-color: #18181c !important;
+    border-bottom: 1px solid #28282c !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .tags-view-container {
+    background-color: #18181c !important;
+    border-bottom: 1px solid #28282c !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+
+    .tags-view-item {
+      background: #242428 !important;
+      border-color: #38383e !important;
+      color: #b0b0b8 !important;
+
+      &.active {
+        background-color: var(--el-color-primary, #409eff) !important;
+        color: #ffffff !important;
+        border-color: var(--el-color-primary, #409eff) !important;
+      }
+
+      .close-icon:hover {
+        background-color: #4a4a52 !important;
+      }
+    }
+  }
+
+  // 针对 ProTable / SearchCard / TableCard 的边框优化
+  .search-card,
+  .table-card,
+  .welcome-card,
+  .stat-card,
+  .chart-card {
+    border-color: #28282c !important;
+  }
+
+  // 滚动条样式优化
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3a3a42;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #1e1e24;
+  }
+}

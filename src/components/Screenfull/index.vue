@@ -1,6 +1,6 @@
 <template>
   <div class="screenfull-wrapper" @click="toggleScreenfull">
-    <el-tooltip :content="isFullscreen ? '退出全屏' : '全屏显示'" placement="bottom">
+    <el-tooltip :content="isFullscreen ? $t('navbar.exitFullScreen') : $t('navbar.fullScreen')" placement="bottom">
       <el-icon :size="18">
         <FullScreen />
       </el-icon>

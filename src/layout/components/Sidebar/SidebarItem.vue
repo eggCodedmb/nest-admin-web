@@ -13,7 +13,7 @@
             <component :is="getMenuIcon(onlyOneChild.meta?.icon || item.meta?.icon)" />
           </el-icon>
           <template #title>
-            <span>{{ onlyOneChild.meta.title }}</span>
+            <span>{{ tRouteTitle(onlyOneChild.meta.title) }}</span>
           </template>
         </el-menu-item>
       </router-link>
@@ -24,7 +24,7 @@
         <el-icon v-if="getMenuIcon(item.meta?.icon)">
           <component :is="getMenuIcon(item.meta?.icon)" />
         </el-icon>
-        <span>{{ item.meta?.title }}</span>
+        <span>{{ tRouteTitle(item.meta?.title) }}</span>
       </template>
 
       <SidebarItem
@@ -42,6 +42,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { RouteRecordRaw } from 'vue-router';
+import { tRouteTitle } from '@/utils/i18n';
 
 const props = defineProps<{
   item: RouteRecordRaw & { alwaysShow?: boolean };

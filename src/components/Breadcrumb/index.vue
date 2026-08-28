@@ -3,9 +3,9 @@
     <transition-group name="breadcrumb">
       <el-breadcrumb-item v-for="(item, index) in levelList" :key="item.path">
         <span v-if="index === levelList.length - 1" class="no-redirect">
-          {{ item.meta.title }}
+          {{ tRouteTitle(item.meta.title as string) }}
         </span>
-        <a v-else @click.prevent="handleLink(item)">{{ item.meta.title }}</a>
+        <a v-else @click.prevent="handleLink(item)">{{ tRouteTitle(item.meta.title as string) }}</a>
       </el-breadcrumb-item>
     </transition-group>
   </el-breadcrumb>
@@ -14,6 +14,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useRoute, useRouter, RouteLocationMatched } from 'vue-router';
+import { tRouteTitle } from '@/utils/i18n';
 
 const route = useRoute();
 const router = useRouter();
