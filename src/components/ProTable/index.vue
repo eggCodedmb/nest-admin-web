@@ -20,6 +20,8 @@
           v-model:showSearch="showSearch"
           :columns="localColumns"
           @queryTable="getTableList"
+          @columnChange="saveColumnVisibility"
+          @resetColumns="handleResetColumns"
         />
       </div>
 
@@ -101,11 +103,13 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { ElTable } from 'element-plus';
 import RightToolbar from '../RightToolbar/index.vue';
 import Pagination from '../Pagination/index.vue';
 import DictTag from '../DictTag/index.vue';
 import { formatDate, DatePattern } from '@/utils/date';
+import { useTableStore } from '@/store/modules/table';
 
 export interface ColumnProps {
   type?: 'selection' | 'index';
@@ -136,6 +140,7 @@ const props = withDefaults(
     stripe?: boolean;
     pagination?: boolean;
     autoRequest?: boolean;
+    tableKey?: string;
   }>(),
   {
     initParam: () => ({}),
@@ -146,6 +151,9 @@ const props = withDefaults(
     autoRequest: true,
   },
 );
+
+const route = useRoute();
+const tableStore = useTableStore();
 
 const tableRef = ref<any>();
 const tableData = ref<any[]>([]);
@@ -159,16 +167,73 @@ const pageParam = ref({
   total: 0,
 });
 
-// 创建 columns 的响应式副本，使显隐列切换具备响应式能力
+function getColumnKey(col: ColumnProps): string {
+  return col.prop || col.slot || col.label || '';
+}
+
+// 自动生成或使用显式指定的 tableKey 作为持久化唯一标识
+const computedTableKey = computed(() => {
+  if (props.tableKey) return props.tableKey;
+  const path = route?.path || 'global_table';
+  const colsSignature = (props.columns || [])
+    .map((c) => getColumnKey(c))
+    .filter(Boolean)
+    .join('_');
+  return `${path}:${colsSignature}`;
+});
+
+// 初始化/同步列配置：默认全部选中 (isShow: true)，并优先从 Pinia 读取用户保存的历史配置
+const initLocalColumns = (cols: ColumnProps[]): ColumnProps[] => {
+  const savedConfig = computedTableKey.value ? tableStore.getTableColumns(computedTableKey.value) : undefined;
+  return cols.map((col) => {
+    const key = getColumnKey(col);
+    let isShow = true; // 默认全部选中
+    if (savedConfig && key && key in savedConfig) {
+      isShow = Boolean(savedConfig[key]);
+    } else if (col.isShow !== undefined) {
+      isShow = Boolean(col.isShow);
+    }
+    return {
+      ...col,
+      isShow,
+    };
+  });
+};
+
+// 创建 columns 的响应式副本，使显隐列切换具备响应式能力与持久化
 const localColumns = ref<ColumnProps[]>([]);
 
 watch(
-  () => props.columns,
-  (newCols) => {
-    localColumns.value = newCols.map((col) => ({ ...col }));
+  [() => props.columns, () => computedTableKey.value],
+  ([newCols]) => {
+    localColumns.value = initLocalColumns(newCols || []);
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 );
+
+// 保存用户的显隐列配置至 Pinia (自动持久化到 localStorage)
+const saveColumnVisibility = () => {
+  if (!computedTableKey.value) return;
+  const configMap: Record<string, boolean> = {};
+  localColumns.value.forEach((col) => {
+    const key = getColumnKey(col);
+    if (key) {
+      configMap[key] = col.isShow !== false;
+    }
+  });
+  tableStore.setTableColumns(computedTableKey.value, configMap);
+};
+
+// 重置列显隐配置为默认全选
+const handleResetColumns = () => {
+  if (computedTableKey.value) {
+    tableStore.resetTableColumns(computedTableKey.value);
+  }
+  localColumns.value = props.columns.map((col) => ({
+    ...col,
+    isShow: true,
+  }));
+};
 
 const activeColumns = computed(() => {
   return localColumns.value.filter((c) => c.isShow !== false);

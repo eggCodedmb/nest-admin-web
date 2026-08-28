@@ -30,6 +30,8 @@ Thumbs.db
 
 # TypeScript cache
 *.tsbuildinfo
+*.config.d.ts
+*.config.js
 
 # Local env overrides
 .env.local

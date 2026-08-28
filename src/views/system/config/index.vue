@@ -2,6 +2,7 @@
   <div class="config-management-container">
     <ProTable
       ref="tableRef"
+      table-key="sys_config"
       :columns="columns"
       :request-api="getConfigList"
       :init-param="queryParams"

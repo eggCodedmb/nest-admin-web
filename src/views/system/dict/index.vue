@@ -3,6 +3,7 @@
     <!-- 字典类型主表 -->
     <ProTable
       ref="typeTableRef"
+      table-key="sys_dict_type"
       :columns="typeColumns"
       :request-api="getDictTypeList"
       :init-param="typeQueryParams"
@@ -99,6 +100,7 @@
       <div class="dict-data-drawer-content p-2">
         <ProTable
           ref="dataTableRef"
+          table-key="sys_dict_data"
           :columns="dataColumns"
           :request-api="getDictDataList"
           :init-param="dataQueryParams"

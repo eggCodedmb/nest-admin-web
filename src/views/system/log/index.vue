@@ -2,6 +2,7 @@
   <div class="log-management-container">
     <ProTable
       ref="tableRef"
+      table-key="sys_log"
       :columns="columns"
       :request-api="getOperLogList"
       :init-param="queryParams"

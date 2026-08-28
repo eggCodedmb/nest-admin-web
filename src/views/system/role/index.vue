@@ -2,6 +2,7 @@
   <div class="role-management-container">
     <ProTable
       ref="tableRef"
+      table-key="sys_role"
       :columns="columns"
       :request-api="getRoleList"
       :init-param="queryParams"

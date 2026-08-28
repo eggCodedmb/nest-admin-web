@@ -9,6 +9,7 @@
     <div class="flex-1 min-w-0">
       <ProTable
         ref="tableRef"
+        table-key="sys_user"
         :columns="columns"
         :request-api="getUserList"
         :init-param="queryParams"
