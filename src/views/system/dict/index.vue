@@ -202,6 +202,7 @@ import {
   updateDictData,
   deleteDictData,
 } from '@/api/system/dict';
+import { cleanDictCache } from '@/hooks/useDict';
 import type { DictTypeEntity, DictDataEntity } from '@/types/system';
 
 // 字典类型表
@@ -265,6 +266,7 @@ const submitTypeForm = async () => {
     try {
       if (typeForm.id) {
         await updateDictType(typeForm.id, typeForm);
+        cleanDictCache(typeForm.dictType);
         ElMessage.success('字典类型修改成功');
       } else {
         await createDictType(typeForm);
@@ -285,14 +287,21 @@ const handleDeleteType = (row: DictTypeEntity) => {
     type: 'warning',
   }).then(async () => {
     await deleteDictType(row.id);
+    cleanDictCache(row.dictType);
     ElMessage.success('删除成功');
     typeTableRef.value?.getTableList();
   });
 };
 
 const handleClearCache = async () => {
-  await clearDictCache();
-  ElMessage.success('字典缓存已成功清除并刷新');
+  try {
+    await clearDictCache();
+    cleanDictCache();
+    ElMessage.success('字典缓存已成功清除并刷新');
+    typeTableRef.value?.getTableList();
+  } catch {
+    // 异常已由响应拦截器处理
+  }
 };
 
 // ============= 字典数据抽屉逻辑 =============
@@ -383,9 +392,11 @@ const submitDataForm = async () => {
     try {
       if (dataForm.id) {
         await updateDictData(dataForm.id, dataForm);
+        cleanDictCache(dataForm.dictType);
         ElMessage.success('字典数据修改成功');
       } else {
         await createDictData(dataForm);
+        cleanDictCache(dataForm.dictType);
         ElMessage.success('字典数据新增成功');
       }
       dataDialogVisible.value = false;
@@ -403,6 +414,7 @@ const handleDeleteData = (row: DictDataEntity) => {
     type: 'warning',
   }).then(async () => {
     await deleteDictData(row.id);
+    cleanDictCache(row.dictType);
     ElMessage.success('删除成功');
     dataTableRef.value?.getTableList();
   });
