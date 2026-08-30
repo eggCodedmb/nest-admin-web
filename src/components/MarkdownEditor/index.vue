@@ -119,24 +119,110 @@ const handleUploadImg = async (files: File[], callback: (urls: string[]) => void
 
 <style scoped>
 .markdown-editor-wrapper {
-  border-radius: 6px;
+  border-radius: 12px;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
+
+/* 编辑器整体外边框与圆角 */
 :deep(.md-editor) {
-  border-radius: 6px;
+  border-radius: 12px;
   border-color: var(--el-border-color-lighter);
+  font-family: inherit;
 }
+
+/* 工具栏容器尺寸调大与内边距优化 */
+:deep(.md-editor-toolbar-wrapper) {
+  padding: 6px 10px;
+  min-height: 48px;
+  background-color: #fafafa;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  display: flex;
+  align-items: center;
+}
+
+/* 单个工具栏图标按钮尺寸调大 */
+:deep(.md-editor-toolbar-item) {
+  width: 34px !important;
+  height: 34px !important;
+  margin: 0 2px !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #4b5563 !important;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.md-editor-toolbar-item:hover) {
+  background-color: rgba(0, 0, 0, 0.07) !important;
+  color: var(--el-color-primary) !important;
+  transform: translateY(-1px);
+}
+
+:deep(.md-editor-toolbar-item:active) {
+  transform: translateY(0);
+}
+
+/* 工具栏 SVG 图标放大 */
+:deep(.md-editor-toolbar-item .md-editor-icon),
+:deep(.md-editor-toolbar-item svg) {
+  width: 20px !important;
+  height: 20px !important;
+  font-size: 20px !important;
+}
+
+/* 分隔线调大优化 */
+:deep(.md-editor-toolbar-divider) {
+  height: 22px !important;
+  margin: 0 6px !important;
+  border-left: 1px solid var(--el-border-color-lighter);
+  opacity: 0.7;
+}
+
+/* 下拉菜单（如标题 H1-H6 等）样式优化 */
+:deep(.md-editor-dropdown) {
+  border-radius: 10px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  padding: 6px !important;
+}
+
+:deep(.md-editor-menu-item) {
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  font-size: 14px !important;
+  transition: background-color 0.2s;
+}
+
+/* 暗色模式适配 (Dark Mode) */
 .markdown-editor-wrapper.is-dark :deep(.md-editor) {
   border-color: #28282c;
   background-color: #18181c;
 }
+
 .markdown-editor-wrapper.is-dark :deep(.md-editor-toolbar-wrapper) {
   background-color: #1f1f24;
   border-bottom-color: #28282c;
 }
+
+.markdown-editor-wrapper.is-dark :deep(.md-editor-toolbar-item) {
+  color: #9ca3af !important;
+}
+
+.markdown-editor-wrapper.is-dark :deep(.md-editor-toolbar-item:hover) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #60a5fa !important;
+}
+
+.markdown-editor-wrapper.is-dark :deep(.md-editor-toolbar-divider) {
+  border-left-color: #374151;
+}
+
 .markdown-editor-wrapper.is-dark :deep(.md-editor-content) {
   background-color: #18181c;
 }
+
 .markdown-editor-wrapper.is-dark :deep(.md-editor-preview) {
   background-color: #18181c;
   color: #e5eaf3;
