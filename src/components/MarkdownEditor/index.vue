@@ -1,6 +1,19 @@
 <template>
-  <div class="markdown-editor-wrapper w-full" :class="{ 'is-dark': isDark }">
+  <div class="markdown-editor-wrapper w-full" :class="{ 'is-dark': isDark, 'is-preview-only': previewOnly }">
+    <!-- 1. 纯预览阅读模式 (审阅/详情): 零编辑框、零工具栏 (No bartools) -->
+    <MdPreview
+      v-if="previewOnly"
+      :id="editorId"
+      :model-value="modelValue"
+      :theme="theme || (isDark ? 'dark' : 'light')"
+      :preview-theme="previewTheme"
+      :code-theme="codeTheme"
+      class="custom-md-preview"
+    />
+
+    <!-- 2. 创作编辑模式: 完整编辑框、大号工具栏与实时绑定 -->
     <MdEditor
+      v-else
       :id="editorId"
       :model-value="modelValue"
       :theme="theme || (isDark ? 'dark' : 'light')"
@@ -8,7 +21,6 @@
       :code-theme="codeTheme"
       :placeholder="placeholder"
       :disabled="disabled"
-      :preview-only="previewOnly"
       :toolbars="toolbars"
       :style="{ height: typeof height === 'number' ? `${height}px` : height }"
       class="custom-md-editor"
@@ -21,7 +33,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { MdEditor, ToolbarNames, Themes, PreviewThemes } from 'md-editor-v3';
+import { MdEditor, MdPreview, ToolbarNames, Themes, PreviewThemes } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
 import { uploadFile } from '@/api/tools/storage';
 import { useAppStore } from '@/store/modules/app';
@@ -122,6 +134,16 @@ const handleUploadImg = async (files: File[], callback: (urls: string[]) => void
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
+}
+
+/* 纯预览模式：去除任何编辑框边框与冗余内边距 */
+.markdown-editor-wrapper.is-preview-only {
+  border: none;
+  background: transparent;
+}
+:deep(.custom-md-preview) {
+  background-color: transparent !important;
+  padding: 0 !important;
 }
 
 /* 编辑器整体外边框与圆角 */
