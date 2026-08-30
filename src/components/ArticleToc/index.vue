@@ -8,7 +8,7 @@
       <el-tag v-if="flatList.length > 0" size="small" type="info" round>{{ flatList.length }} 节</el-tag>
     </div>
 
-    <!-- 方案1: 若绑定了 editorId，使用 MdCatalog 原生大纲并绑定双重点击智能平滑定位 -->
+    <!-- 方案1: 若绑定了 editorId，使用 MdCatalog 原生大纲并绑定高精度滑块定位与智能平滑跳转 -->
     <div v-if="editorId" class="md-catalog-box" @click.capture="handleContainerClick">
       <el-scrollbar :max-height="maxHeight">
         <MdCatalog
@@ -16,7 +16,9 @@
           :scroll-element="scrollElement"
           :theme="isDark ? 'dark' : 'light'"
           :on-click="handleCatalogClick"
+          :on-active="handleCatalogActive"
           @on-click="handleCatalogClick"
+          @on-active="handleCatalogActive"
         />
       </el-scrollbar>
     </div>
@@ -104,7 +106,6 @@ const findHeadingElement = (item: { text?: string; id?: string; index?: number }
 
   const headings = Array.from(root.querySelectorAll('h1, h2, h3, h4, h5, h6')) as HTMLElement[];
   if (headings.length === 0) {
-    // 若在子容器未找到，兜底全局查找
     const globalHeadings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')) as HTMLElement[];
     if (globalHeadings.length === 0) return null;
     headings.push(...globalHeadings);
@@ -151,7 +152,6 @@ const findHeadingElement = (item: { text?: string; id?: string; index?: number }
 
 // 通用平滑滚动执行器
 const performSmoothScroll = (targetEle: HTMLElement) => {
-  // 1. 优先获取显式指定的滚动容器
   let container: HTMLElement | null = null;
   if (typeof props.scrollElement === 'string') {
     container = document.querySelector(props.scrollElement);
@@ -159,7 +159,6 @@ const performSmoothScroll = (targetEle: HTMLElement) => {
     container = props.scrollElement;
   }
 
-  // 2. 若未显式传入，自动向上递归查找最近的可滚动父级容器
   if (!container) {
     let parent = targetEle.parentElement;
     while (parent && parent !== document.body) {
@@ -172,7 +171,6 @@ const performSmoothScroll = (targetEle: HTMLElement) => {
     }
   }
 
-  // 3. 执行平滑滚动或 scrollIntoView
   if (container) {
     const containerRect = container.getBoundingClientRect();
     const targetRect = targetEle.getBoundingClientRect();
@@ -187,7 +185,25 @@ const performSmoothScroll = (targetEle: HTMLElement) => {
   }
 };
 
-// 方案1: MdCatalog 回调拦截
+// 🎯 高精度滑块 (md-editor-catalog-indicator) 坐标纠偏与校准算法
+const handleCatalogActive = (_tocItem: any, ele: HTMLElement) => {
+  if (!ele) return;
+  const catalogBox = ele.closest('.md-editor-catalog') as HTMLElement;
+  const indicator = catalogBox?.querySelector('.md-editor-catalog-indicator') as HTMLElement;
+
+  if (catalogBox && indicator) {
+    const boxRect = catalogBox.getBoundingClientRect();
+    const spanEle = ele.querySelector(':scope > span') || ele;
+    const spanRect = spanEle.getBoundingClientRect();
+
+    // 智能计算相对目录外框的真实像素偏移量，精准居中于文字行高
+    const exactTop = spanRect.top - boxRect.top + Math.max(0, (spanRect.height - 18) / 2);
+    indicator.style.top = `${exactTop}px`;
+    indicator.style.display = 'block';
+  }
+};
+
+// 方案1: MdCatalog 点击回调
 const handleCatalogClick = (e: MouseEvent, item: any) => {
   e.preventDefault();
   e.stopPropagation();
@@ -197,7 +213,7 @@ const handleCatalogClick = (e: MouseEvent, item: any) => {
   }
 };
 
-// 方案1 兜底: 捕获容器点击事件 (保证任何情况下点击文字均能 100% 平滑跳转)
+// 方案1 兜底: 捕获容器点击事件
 const handleContainerClick = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
   if (!target) return;
@@ -206,7 +222,6 @@ const handleContainerClick = (e: MouseEvent) => {
   const rawText = (linkWrapper?.querySelector('span')?.textContent || target.textContent || '').trim();
 
   if (rawText) {
-    // 计算当前点击的 link 在列表中的序号
     let index: number | undefined;
     if (linkWrapper) {
       const allLinks = Array.from(document.querySelectorAll('.md-editor-catalog-link'));
@@ -241,14 +256,48 @@ const scrollToHeadingByItem = (item: { text: string; id?: string }, index: numbe
 }
 :deep(.md-editor-catalog) {
   font-size: 13px;
+  position: relative;
 }
 :deep(.md-editor-catalog-link) {
   cursor: pointer !important;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  padding: 4px 6px !important;
 }
+:deep(.md-editor-catalog-link:hover) {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.article-toc-panel:has(.md-editor-catalog-dark) :deep(.md-editor-catalog-link:hover) {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* 🎯 指示器滑块精准优化 */
+:deep(.md-editor-catalog-indicator) {
+  width: 3.5px !important;
+  height: 18px !important;
+  border-radius: 4px !important;
+  background-color: var(--el-color-primary, #409eff) !important;
+  left: 0 !important;
+  transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 🎯 当前激活项的文字高亮与柔和背景胶囊 */
+:deep(.md-editor-catalog-active > span) {
+  color: var(--el-color-primary, #409eff) !important;
+  font-weight: 600 !important;
+}
+:deep(.md-editor-catalog-active) {
+  background-color: rgba(64, 158, 255, 0.08) !important;
+}
+
+/* 暗色模式适配 (Dark Mode) */
 :deep(.md-editor-catalog-dark) {
-  color: #c0c4cc;
+  color: #9ca3af;
+}
+:deep(.md-editor-catalog-dark .md-editor-catalog-active) {
+  background-color: rgba(64, 158, 255, 0.16) !important;
 }
 :deep(.md-editor-catalog-dark .md-editor-catalog-active > span) {
-  color: var(--el-color-primary, #409eff);
+  color: #60a5fa !important;
 }
 </style>
