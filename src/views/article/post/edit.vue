@@ -286,9 +286,13 @@
         <div class="space-y-2 pt-1">
           <span class="text-xs font-medium text-gray-700 dark:text-gray-300 block">内容来源</span>
           <el-radio-group v-model="form.sourceType" class="w-full">
-            <el-radio-button :value="1">原创</el-radio-button>
-            <el-radio-button :value="2">转载</el-radio-button>
-            <el-radio-button :value="3">翻译</el-radio-button>
+            <el-radio-button
+              v-for="dict in art_source_type"
+              :key="dict.dictValue"
+              :value="Number(dict.dictValue)"
+            >
+              {{ dict.dictLabel }}
+            </el-radio-button>
           </el-radio-group>
 
           <el-input
@@ -328,9 +332,12 @@ import ArticleToc from '@/components/ArticleToc/index.vue';
 import { getCategoryTree } from '@/api/article/category';
 import { getArticle, createArticle, updateArticle, submitArticleAudit } from '@/api/article/post';
 import { uploadFile } from '@/api/tools/storage';
+import { useDict } from '@/hooks/useDict';
 
 const route = useRoute();
 const router = useRouter();
+
+const { art_source_type } = useDict('art_source_type');
 
 const categoryTree = ref<any[]>([]);
 const draftLoading = ref(false);

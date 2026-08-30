@@ -1,27 +1,33 @@
 <template>
   <div class="article-audit-container p-4">
-    <!-- 顶部状态快速筛选卡片 -->
-    <div class="bg-white dark:bg-dark-900 px-4 pt-3 rounded-t-xl border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-      <el-tabs v-model="activeStatusTab" class="audit-status-tabs" @tab-change="handleStatusTabChange">
+    <!-- 顶部状态切换 Tabs -->
+    <div class="bg-white dark:bg-dark-900 rounded-t-xl border border-b-0 border-gray-200/70 dark:border-gray-800 p-3 pb-0">
+      <el-tabs
+        v-model="activeStatusTab"
+        type="card"
+        class="audit-status-tabs"
+        @tab-change="handleStatusTabChange"
+      >
         <el-tab-pane label="待我审核" name="1" />
-        <el-tab-pane label="审核通过 (已发布)" name="2" />
-        <el-tab-pane label="已驳回记录" name="3" />
-        <el-tab-pane label="全部审阅池" name="all" />
+        <el-tab-pane label="审核通过" name="2" />
+        <el-tab-pane label="已驳回" name="3" />
+        <el-tab-pane label="全部流转" name="all" />
       </el-tabs>
     </div>
 
+    <!-- 审核表格数据 -->
     <ProTable
       ref="tableRef"
-      table-key="art_article_audit_v2"
+      table-key="art_article_audit_list"
       :columns="columns"
       :request-api="getAuditList"
       :init-param="queryParams"
     >
-      <!-- 搜索栏 -->
+      <!-- 搜索插槽 -->
       <template #search="{ search, reset }">
         <el-form :model="queryParams" inline>
           <el-form-item label="文章标题">
-            <el-input v-model="queryParams.title" placeholder="请输入标题模糊搜索" clearable />
+            <el-input v-model="queryParams.title" placeholder="模糊搜索标题" clearable />
           </el-form-item>
           <el-form-item label="所属分类">
             <el-tree-select
@@ -41,9 +47,12 @@
         </el-form>
       </template>
 
-      <!-- 文章标题与封面图插槽 -->
+      <!-- 文章标题与缩略图插槽 -->
       <template #title="{ row }">
-        <div class="flex items-center gap-3 py-1.5 cursor-pointer group" @click="handleOpenAudit(row)">
+        <div
+          class="flex items-center gap-3 py-1 cursor-pointer group"
+          @click="handleOpenAudit(row)"
+        >
           <el-image
             v-if="row.coverImage"
             :src="row.coverImage"
@@ -65,20 +74,6 @@
             </span>
           </div>
         </div>
-      </template>
-
-      <!-- 审核状态插槽 -->
-      <template #status="{ row }">
-        <el-tag v-if="row.status === 1" type="warning" effect="light" class="rounded-full font-medium">
-          待审核
-        </el-tag>
-        <el-tag v-else-if="row.status === 2" type="success" effect="light" class="rounded-full font-medium">
-          审核通过
-        </el-tag>
-        <el-tag v-else-if="row.status === 3" type="danger" effect="light" class="rounded-full font-medium">
-          已驳回
-        </el-tag>
-        <el-tag v-else type="info" class="rounded-full font-medium">其它</el-tag>
       </template>
 
       <!-- 操作列插槽 -->
@@ -107,6 +102,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { Checked } from '@element-plus/icons-vue';
 import ProTable, { ColumnProps } from '@/components/ProTable/index.vue';
 import AuditDialog from './components/AuditDialog.vue';
+import { useDict } from '@/hooks/useDict';
 import { getAuditList } from '@/api/article/audit';
 import { getCategoryTree } from '@/api/article/category';
 import type { ArticleEntity } from '@/types/article';
@@ -115,6 +111,9 @@ const tableRef = ref<InstanceType<typeof ProTable>>();
 const auditDialogRef = ref<InstanceType<typeof AuditDialog>>();
 const categoryTree = ref<any[]>([]);
 const activeStatusTab = ref('1');
+
+// 接入系统字典 art_post_status
+const { art_post_status } = useDict('art_post_status');
 
 const queryParams = reactive({
   title: '',
@@ -127,7 +126,7 @@ const columns: ColumnProps[] = [
   { prop: 'title', label: '文章标题与内容', minWidth: 280, slot: 'title' },
   { prop: 'categoryName', label: '所属分类', minWidth: 120, align: 'center' },
   { prop: 'authorName', label: '作者', width: 110, align: 'center' },
-  { prop: 'status', label: '审核状态', width: 110, slot: 'status', align: 'center' },
+  { prop: 'status', label: '审核状态', width: 110, dictOptions: art_post_status, align: 'center' },
   { prop: 'updatedAt', label: '提交时间', width: 180, align: 'center' },
   { prop: 'action', label: '操作', width: 130, slot: 'action', align: 'center', fixed: 'right' },
 ];

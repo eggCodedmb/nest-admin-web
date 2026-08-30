@@ -34,6 +34,16 @@
               class="w-40"
             />
           </el-form-item>
+          <el-form-item label="文章状态">
+            <el-select v-model="queryParams.status" placeholder="全部状态" clearable class="w-28">
+              <el-option
+                v-for="dict in art_post_status"
+                :key="dict.dictValue"
+                :label="dict.dictLabel"
+                :value="Number(dict.dictValue)"
+              />
+            </el-select>
+          </el-form-item>
           <el-form-item label="是否置顶">
             <el-select v-model="queryParams.isTop" placeholder="置顶" clearable class="w-24">
               <el-option label="是" :value="1" />
@@ -77,15 +87,6 @@
             </span>
           </div>
         </div>
-      </template>
-
-      <!-- 状态标签 -->
-      <template #status="{ row }">
-        <el-tag v-if="row.status === 0" type="info">草稿</el-tag>
-        <el-tag v-else-if="row.status === 1" type="warning">待审核</el-tag>
-        <el-tag v-else-if="row.status === 2" type="success">已发布</el-tag>
-        <el-tag v-else-if="row.status === 3" type="danger">已驳回</el-tag>
-        <el-tag v-else-if="row.status === 4" type="info" effect="plain">已下架</el-tag>
       </template>
 
       <!-- 置顶快捷开关 -->
@@ -156,6 +157,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import ProTable, { ColumnProps } from '@/components/ProTable/index.vue';
+import { useDict } from '@/hooks/useDict';
 import {
   getArticleList,
   deleteArticle,
@@ -170,6 +172,9 @@ const tableRef = ref<InstanceType<typeof ProTable>>();
 const activeTab = ref('all');
 const categoryTree = ref<any[]>([]);
 
+// 接入系统字典 art_post_status
+const { art_post_status } = useDict('art_post_status');
+
 const queryParams = reactive({
   title: '',
   categoryId: undefined as number | undefined,
@@ -182,7 +187,7 @@ const columns: ColumnProps[] = [
   { prop: 'title', label: '文章标题', minWidth: 260, slot: 'title' },
   { prop: 'categoryName', label: '所属分类', minWidth: 120, align: 'center' },
   { prop: 'authorName', label: '作者', width: 100, align: 'center' },
-  { prop: 'status', label: '状态', width: 90, slot: 'status', align: 'center' },
+  { prop: 'status', label: '状态', width: 100, dictOptions: art_post_status, align: 'center' },
   { prop: 'isTop', label: '置顶', width: 80, slot: 'isTop', align: 'center' },
   { prop: 'viewCount', label: '阅读量', width: 80, align: 'center' },
   { prop: 'publishedAt', label: '发布时间', width: 170, align: 'center' },
@@ -258,11 +263,11 @@ const handleToggleOnline = (row: ArticleEntity, targetStatus: number) => {
 };
 
 const handleDelete = (row: ArticleEntity) => {
-  ElMessageBox.confirm(`确定删除文章 "${row.title}" 吗？`, '删除确认', {
+  ElMessageBox.confirm(`确定要删除文章 "${row.title}" 吗？删除后不可恢复！`, '删除警告', {
     type: 'warning',
   }).then(async () => {
     await deleteArticle(row.id);
-    ElMessage.success('文章删除成功');
+    ElMessage.success('删除文章成功');
     tableRef.value?.getTableList();
   });
 };
@@ -271,3 +276,9 @@ onMounted(() => {
   loadCategories();
 });
 </script>
+
+<style scoped>
+:deep(.el-tabs__header) {
+  margin-bottom: 0;
+}
+</style>
