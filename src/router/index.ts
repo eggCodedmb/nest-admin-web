@@ -26,6 +26,19 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/article/post',
+    component: Layout,
+    meta: { hidden: true },
+    children: [
+      {
+        path: 'edit',
+        component: () => import('@/views/article/post/edit.vue'),
+        name: 'ArticleEdit',
+        meta: { title: '文章编辑', activeMenu: '/article/post' },
+      },
+    ],
+  },
 ];
 
 const router = createRouter({

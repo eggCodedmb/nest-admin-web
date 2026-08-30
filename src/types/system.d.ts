@@ -120,6 +120,7 @@ export interface ConfigEntity {
   configKey: string;
   configValue: string;
   configType: number; // 0否 1是
+  status: number; // 0停用 1启用
   remark?: string;
   createdAt: string;
   updatedAt: string;

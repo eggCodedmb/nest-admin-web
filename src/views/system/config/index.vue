@@ -21,6 +21,12 @@
               <el-option label="否" :value="0" />
             </el-select>
           </el-form-item>
+          <el-form-item label="启用状态">
+            <el-select v-model="queryParams.status" placeholder="状态" clearable class="w-28">
+              <el-option label="启用" :value="1" />
+              <el-option label="停用" :value="0" />
+            </el-select>
+          </el-form-item>
           <el-form-item>
             <el-button type="primary" icon="Search" @click="search(queryParams)">搜索</el-button>
             <el-button icon="Refresh" @click="reset(queryParams)">重置</el-button>
@@ -41,6 +47,16 @@
         <el-tag :type="row.configType === 1 ? 'danger' : 'info'">
           {{ row.configType === 1 ? '系统内置' : '普通配置' }}
         </el-tag>
+      </template>
+
+      <template #status="{ row }">
+        <el-switch
+          :model-value="Number(row?.status) === 1 ? 1 : 0"
+          :active-value="1"
+          :inactive-value="0"
+          v-hasPermi="['sys:config:update']"
+          :before-change="() => handleBeforeStatusChange(row)"
+        />
       </template>
 
       <template #action="{ row }">
@@ -80,6 +96,12 @@
             <el-radio :value="0">否</el-radio>
           </el-radio-group>
         </el-form-item>
+        <el-form-item label="启用状态" prop="status">
+          <el-radio-group v-model="form.status">
+            <el-radio :value="1">启用</el-radio>
+            <el-radio :value="0">停用</el-radio>
+          </el-radio-group>
+        </el-form-item>
         <el-form-item label="备注说明" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入备注内容" />
         </el-form-item>
@@ -111,6 +133,7 @@ const queryParams = reactive({
   configName: '',
   configKey: '',
   configType: undefined as number | undefined,
+  status: undefined as number | undefined,
 });
 
 const tableRef = ref<InstanceType<typeof ProTable>>();
@@ -121,6 +144,7 @@ const columns: ColumnProps[] = [
   { prop: 'configKey', label: '参数键名', minWidth: 200 },
   { prop: 'configValue', label: '参数键值', minWidth: 140 },
   { prop: 'configType', label: '系统内置', width: 100, slot: 'configType' },
+  { prop: 'status', label: '启用状态', width: 100, slot: 'status', align: 'center' },
   { prop: 'remark', label: '备注', minWidth: 140 },
   { prop: 'createdAt', label: '创建时间', width: 180 },
   { prop: 'action', label: '操作', width: 160, slot: 'action', align: 'center', fixed: 'right' },
@@ -137,12 +161,14 @@ const form = reactive<{
   configKey: string;
   configValue: string;
   configType: number;
+  status: number;
   remark?: string;
 }>({
   configName: '',
   configKey: '',
   configValue: '',
   configType: 0,
+  status: 1,
   remark: '',
 });
 
@@ -159,6 +185,7 @@ const handleAdd = () => {
     configKey: '',
     configValue: '',
     configType: 0,
+    status: 1,
     remark: '',
   });
   dialogTitle.value = '新增参数配置';
@@ -166,17 +193,57 @@ const handleAdd = () => {
 };
 
 const handleEdit = async (row: ConfigEntity) => {
-  const res = await getConfig(row.id);
+  const rowId = row?.id ?? (row as any)?.configId;
+  if (!rowId) {
+    ElMessage.error('无法获取参数配置ID');
+    return;
+  }
+  const res = await getConfig(rowId);
   Object.assign(form, {
     id: res.id,
     configName: res.configName,
     configKey: res.configKey,
     configValue: res.configValue,
     configType: res.configType,
+    status: res.status,
     remark: res.remark,
   });
   dialogTitle.value = '修改参数配置';
   dialogVisible.value = true;
+};
+
+const handleBeforeStatusChange = (row: ConfigEntity): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const rowId = row?.id ?? (row as any)?.configId;
+    if (!rowId) {
+      ElMessage.error('无法获取参数配置ID');
+      resolve(false);
+      return;
+    }
+    const currentStatus = Number(row.status);
+    const targetStatus = currentStatus === 1 ? 0 : 1;
+    const text = targetStatus === 1 ? '启用' : '停用';
+    const configName = row.configName || '该参数配置';
+
+    ElMessageBox.confirm(`确定要${text}参数 "${configName}" 吗？`, '状态变更确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+      .then(async () => {
+        try {
+          await updateConfig(rowId, { status: targetStatus });
+          row.status = targetStatus;
+          ElMessage.success(`参数已${text}`);
+          resolve(true);
+        } catch {
+          resolve(false);
+        }
+      })
+      .catch(() => {
+        resolve(false);
+      });
+  });
 };
 
 const submitForm = async () => {
@@ -201,12 +268,17 @@ const submitForm = async () => {
 };
 
 const handleDelete = (row: ConfigEntity) => {
+  const rowId = row?.id ?? (row as any)?.configId;
+  if (!rowId) {
+    ElMessage.error('无法获取参数配置ID');
+    return;
+  }
   ElMessageBox.confirm(`确定删除参数 "${row.configName}" 吗？`, '删除确认', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',
   }).then(async () => {
-    await deleteConfig(row.id);
+    await deleteConfig(rowId);
     ElMessage.success('删除成功');
     tableRef.value?.getTableList();
   });

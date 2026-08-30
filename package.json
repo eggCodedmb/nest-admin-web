@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pro": "vite --mode production"
   },
   "dependencies": {
     "@casl/ability": "^6.7.2",
@@ -16,6 +17,7 @@
     "echarts": "^5.5.1",
     "element-plus": "^2.9.4",
     "lodash-es": "^4.17.21",
+    "md-editor-v3": "^5.3.1",
     "nprogress": "^0.2.0",
     "pinia": "^2.3.1",
     "pinia-plugin-persistedstate": "^4.2.0",

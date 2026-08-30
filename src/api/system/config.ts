@@ -2,7 +2,7 @@ import request from '@/utils/request';
 import type { PageResult } from '@/types/api';
 import type { ConfigEntity } from '@/types/system';
 
-export function getConfigList(params?: { pageNum?: number; pageSize?: number; configName?: string; configKey?: string; configType?: number }) {
+export function getConfigList(params?: { pageNum?: number; pageSize?: number; configName?: string; configKey?: string; configType?: number; status?: number }) {
   return request<any, PageResult<ConfigEntity>>({
     url: '/system/config/list',
     method: 'get',
@@ -11,13 +11,16 @@ export function getConfigList(params?: { pageNum?: number; pageSize?: number; co
 }
 
 export function getConfigValueByKey(configKey: string) {
-  return request<any, { configKey: string; configValue: string }>({
+  return request<any, { configKey: string; configValue: string; status: number }>({
     url: `/system/config/key/${configKey}`,
     method: 'get',
   });
 }
 
-export function getConfig(id: number) {
+export function getConfig(id: number | string) {
+  if (id === undefined || id === null || id === '' || id === 'undefined') {
+    return Promise.reject(new Error('配置项ID不能为空'));
+  }
   return request<any, ConfigEntity>({
     url: `/system/config/${id}`,
     method: 'get',
@@ -32,7 +35,10 @@ export function createConfig(data: Partial<ConfigEntity>) {
   });
 }
 
-export function updateConfig(id: number, data: Partial<ConfigEntity>) {
+export function updateConfig(id: number | string, data: Partial<ConfigEntity>) {
+  if (id === undefined || id === null || id === '' || id === 'undefined') {
+    return Promise.reject(new Error('配置项ID不能为空'));
+  }
   return request<any, ConfigEntity>({
     url: `/system/config/${id}`,
     method: 'put',
@@ -40,7 +46,10 @@ export function updateConfig(id: number, data: Partial<ConfigEntity>) {
   });
 }
 
-export function deleteConfig(id: number) {
+export function deleteConfig(id: number | string) {
+  if (id === undefined || id === null || id === '' || id === 'undefined') {
+    return Promise.reject(new Error('配置项ID不能为空'));
+  }
   return request<any, { message: string }>({
     url: `/system/config/${id}`,
     method: 'delete',

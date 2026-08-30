@@ -86,8 +86,9 @@ import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessage } from 'element-plus';
-import { getCaptcha } from '@/api/auth';
+import { getCaptcha, getCaptchaStatus } from '@/api/auth';
 import { useUserStore } from '@/store/modules/user';
+import { getRememberedLogin, setRememberedLogin, removeRememberedLogin } from '@/utils/auth';
 import LangSelect from '@/components/LangSelect/index.vue';
 import ThemeSwitch from '@/components/ThemeSwitch/index.vue';
 
@@ -112,10 +113,22 @@ const loginForm = reactive({
 const loginRules = computed<FormRules>(() => ({
   username: [{ required: true, message: t('login.usernameRequired'), trigger: 'blur' }],
   password: [{ required: true, message: t('login.passwordRequired'), trigger: 'blur' }],
-  code: [{ required: true, message: t('login.captchaRequired'), trigger: 'blur' }],
+  ...(captchaEnabled.value
+    ? { code: [{ required: true, message: t('login.captchaRequired'), trigger: 'blur' }] }
+    : {}),
 }));
 
+const loadRememberedLogin = () => {
+  const remembered = getRememberedLogin();
+  if (remembered) {
+    loginForm.username = remembered.username || '';
+    loginForm.password = remembered.password || '';
+    rememberMe.value = remembered.rememberMe;
+  }
+};
+
 const fetchCaptcha = async () => {
+  if (!captchaEnabled.value) return;
   try {
     const res = await getCaptcha();
     loginForm.uuid = res.uuid;
@@ -132,12 +145,21 @@ const handleLogin = async () => {
     loading.value = true;
     try {
       await userStore.login(loginForm);
+      if (rememberMe.value) {
+        setRememberedLogin({
+          username: loginForm.username,
+          password: loginForm.password,
+          rememberMe: true,
+        });
+      } else {
+        removeRememberedLogin();
+      }
       ElMessage.success(t('login.loginSuccess'));
       const redirect = route.query.redirect ? String(route.query.redirect) : '/';
       router.push(redirect);
     } catch (error) {
       // 登录失败重新刷新验证码
-      fetchCaptcha();
+      if (captchaEnabled.value) fetchCaptcha();
       loginForm.code = '';
     } finally {
       loading.value = false;
@@ -145,8 +167,27 @@ const handleLogin = async () => {
   });
 };
 
+const loadCaptchaStatus = async () => {
+  try {
+    const res = await getCaptchaStatus();
+    captchaEnabled.value = res.enabled;
+    if (res.enabled) {
+      await fetchCaptcha();
+    } else {
+      loginForm.code = '';
+      loginForm.uuid = '';
+      captchaSvg.value = '';
+    }
+  } catch {
+    // 后端不可用时按默认开启处理，避免绕过验证码保护
+    captchaEnabled.value = true;
+    await fetchCaptcha();
+  }
+};
+
 onMounted(() => {
-  fetchCaptcha();
+  loadRememberedLogin();
+  void loadCaptchaStatus();
 });
 </script>
 

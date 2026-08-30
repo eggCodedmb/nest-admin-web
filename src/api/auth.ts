@@ -6,6 +6,10 @@ export interface CaptchaResult {
   img: string;
 }
 
+export interface CaptchaStatusResult {
+  enabled: boolean;
+}
+
 export interface LoginParams {
   username: string;
   password: string;
@@ -30,6 +34,13 @@ export interface ProfileResult {
 export function getCaptcha() {
   return request<any, CaptchaResult>({
     url: '/auth/captcha',
+    method: 'get',
+  });
+}
+
+export function getCaptchaStatus() {
+  return request<any, CaptchaStatusResult>({
+    url: '/auth/captcha/status',
     method: 'get',
   });
 }
