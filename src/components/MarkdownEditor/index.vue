@@ -1,8 +1,11 @@
 <template>
-  <div class="markdown-editor-wrapper w-full">
+  <div class="markdown-editor-wrapper w-full" :class="{ 'is-dark': isDark }">
     <MdEditor
       :id="editorId"
       :model-value="modelValue"
+      :theme="theme || (isDark ? 'dark' : 'light')"
+      :preview-theme="previewTheme"
+      :code-theme="codeTheme"
       :placeholder="placeholder"
       :disabled="disabled"
       :preview-only="previewOnly"
@@ -17,9 +20,11 @@
 </template>
 
 <script setup lang="ts">
-import { MdEditor, ToolbarNames } from 'md-editor-v3';
+import { computed } from 'vue';
+import { MdEditor, ToolbarNames, Themes, PreviewThemes } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
 import { uploadFile } from '@/api/tools/storage';
+import { useAppStore } from '@/store/modules/app';
 import { ElMessage } from 'element-plus';
 
 interface Props {
@@ -29,6 +34,9 @@ interface Props {
   disabled?: boolean;
   previewOnly?: boolean;
   height?: string | number;
+  theme?: Themes;
+  previewTheme?: PreviewThemes;
+  codeTheme?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -38,7 +46,13 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   previewOnly: false,
   height: '620px',
+  theme: undefined,
+  previewTheme: 'github',
+  codeTheme: 'atom',
 });
+
+const appStore = useAppStore();
+const isDark = computed(() => appStore.theme === 'dark');
 
 const emit = defineEmits<{
   (e: 'update:modelValue', val: string): void;
@@ -110,5 +124,21 @@ const handleUploadImg = async (files: File[], callback: (urls: string[]) => void
 }
 :deep(.md-editor) {
   border-radius: 6px;
+  border-color: var(--el-border-color-lighter);
+}
+.markdown-editor-wrapper.is-dark :deep(.md-editor) {
+  border-color: #28282c;
+  background-color: #18181c;
+}
+.markdown-editor-wrapper.is-dark :deep(.md-editor-toolbar-wrapper) {
+  background-color: #1f1f24;
+  border-bottom-color: #28282c;
+}
+.markdown-editor-wrapper.is-dark :deep(.md-editor-content) {
+  background-color: #18181c;
+}
+.markdown-editor-wrapper.is-dark :deep(.md-editor-preview) {
+  background-color: #18181c;
+  color: #e5eaf3;
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="article-management-container p-4">
     <!-- 状态筛选 Tabs -->
-    <el-tabs v-model="activeTab" type="card" class="bg-white px-4 pt-3 rounded-t-lg border-b-0" @tab-change="handleTabChange">
+    <el-tabs v-model="activeTab" type="card" class="bg-white dark:bg-dark-900 px-4 pt-3 rounded-t-lg border-b-0 dark:border-gray-800" @tab-change="handleTabChange">
       <el-tab-pane label="全部文章" name="all" />
       <el-tab-pane label="草稿箱" name="draft" />
       <el-tab-pane label="待审核" name="pending" />
@@ -60,7 +60,7 @@
           <el-image
             v-if="row.coverImage"
             :src="row.coverImage"
-            class="w-14 h-10 rounded object-cover flex-shrink-0 border"
+            class="w-14 h-10 rounded object-cover flex-shrink-0 border dark:border-gray-700"
             :preview-src-list="[row.coverImage]"
             preview-teleported
           />
@@ -68,11 +68,11 @@
             <div class="flex items-center gap-1.5">
               <el-tag v-if="row.isTop === 1" size="small" type="danger" effect="dark">置顶</el-tag>
               <el-tag v-if="row.isRecommend === 1" size="small" type="warning" effect="plain">推荐</el-tag>
-              <span class="font-medium text-gray-900 truncate hover:text-primary cursor-pointer" @click="handleEdit(row)">
+              <span class="font-medium text-gray-900 dark:text-gray-100 truncate hover:text-primary dark:hover:text-primary cursor-pointer" @click="handleEdit(row)">
                 {{ row.title }}
               </span>
             </div>
-            <span v-if="row.summary" class="text-xs text-gray-400 truncate mt-0.5 max-w-md">
+            <span v-if="row.summary" class="text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5 max-w-md">
               {{ row.summary }}
             </span>
           </div>

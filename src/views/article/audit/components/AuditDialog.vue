@@ -12,29 +12,29 @@
       <!-- 左侧：文章完整渲染视图 (可滚动) -->
       <div class="flex-1 overflow-y-auto pr-3 space-y-4" id="audit-preview-scroll-wrapper">
         <!-- 头部元信息 -->
-        <div class="bg-gray-50/80 p-4 rounded-lg border border-gray-100 space-y-2">
+        <div class="bg-gray-50/80 dark:bg-dark-800/90 p-4 rounded-lg border border-gray-100 dark:border-gray-700/60 space-y-2">
           <div class="flex items-center gap-2">
             <el-tag v-if="article?.isTop === 1" size="small" type="danger">置顶</el-tag>
-            <h1 class="text-xl font-bold text-gray-900">{{ article?.title }}</h1>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ article?.title }}</h1>
           </div>
-          <div class="flex flex-wrap items-center gap-4 text-xs text-gray-500">
-            <span>作者：<strong class="text-gray-700">{{ article?.authorName }}</strong></span>
-            <span>分类：<strong class="text-gray-700">{{ article?.categoryName }}</strong></span>
+          <div class="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <span>作者：<strong class="text-gray-700 dark:text-gray-200">{{ article?.authorName }}</strong></span>
+            <span>分类：<strong class="text-gray-700 dark:text-gray-200">{{ article?.categoryName }}</strong></span>
             <span>提交时间：{{ article?.updatedAt || article?.createdAt }}</span>
             <span v-if="article?.tags">标签：<el-tag size="small" type="info">{{ article?.tags }}</el-tag></span>
           </div>
-          <div v-if="article?.summary" class="text-xs text-gray-600 bg-white p-2.5 rounded border border-gray-100">
-            <span class="font-medium text-gray-700">摘要：</span>{{ article?.summary }}
+          <div v-if="article?.summary" class="text-xs text-gray-600 dark:text-gray-300 bg-white dark:bg-dark-900 p-2.5 rounded border border-gray-100 dark:border-gray-700/60">
+            <span class="font-medium text-gray-700 dark:text-gray-200">摘要：</span>{{ article?.summary }}
           </div>
         </div>
 
         <!-- 封面图预览 -->
         <div v-if="article?.coverImage" class="w-full">
-          <img :src="article?.coverImage" class="w-full max-h-64 object-cover rounded-lg border border-gray-200" />
+          <img :src="article?.coverImage" class="w-full max-h-64 object-cover rounded-lg border border-gray-200 dark:border-gray-700" />
         </div>
 
         <!-- Markdown 渲染正文 -->
-        <div class="article-content-box bg-white p-4 rounded-lg border border-gray-100">
+        <div class="article-content-box bg-white dark:bg-dark-900 p-4 rounded-lg border border-gray-100 dark:border-gray-700/60">
           <MarkdownEditor
             editor-id="audit-markdown-view"
             :model-value="article?.content || ''"
@@ -45,7 +45,7 @@
       </div>
 
       <!-- 右侧：目录大纲、审核操作与流转历史 (固定宽) -->
-      <div class="w-full lg:w-80 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-gray-200 lg:pl-4 pt-4 lg:pt-0">
+      <div class="w-full lg:w-80 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700 lg:pl-4 pt-4 lg:pt-0">
         <!-- 目录与历史 Tab -->
         <div class="flex-1 overflow-hidden flex flex-col">
           <el-tabs v-model="rightTab" class="mb-2">
@@ -54,7 +54,7 @@
             </el-tab-pane>
             <el-tab-pane label="审核历史" name="logs">
               <el-scrollbar max-height="300px" class="pr-2">
-                <div v-if="auditLogs.length === 0" class="text-xs text-gray-400 text-center py-6">
+                <div v-if="auditLogs.length === 0" class="text-xs text-gray-400 dark:text-gray-500 text-center py-6">
                   暂无审核记录
                 </div>
                 <el-timeline v-else class="text-xs pt-2">
@@ -64,13 +64,13 @@
                     :timestamp="log.createdAt"
                     :type="log.auditResult === 1 ? 'success' : 'danger'"
                   >
-                    <div class="font-medium text-gray-800">
+                    <div class="font-medium text-gray-800 dark:text-gray-200">
                       {{ log.auditorName }}：
                       <el-tag size="small" :type="log.auditResult === 1 ? 'success' : 'danger'">
                         {{ log.auditResult === 1 ? '审核通过' : '审核驳回' }}
                       </el-tag>
                     </div>
-                    <div v-if="log.auditComment" class="text-gray-500 mt-1">
+                    <div v-if="log.auditComment" class="text-gray-500 dark:text-gray-400 mt-1">
                       {{ log.auditComment }}
                     </div>
                   </el-timeline-item>
@@ -81,8 +81,8 @@
         </div>
 
         <!-- 审核操作区 -->
-        <div class="border-t border-gray-200 pt-3 space-y-3 bg-white">
-          <span class="text-xs font-bold text-gray-700 block">审核处理意见</span>
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-3 space-y-3 bg-white dark:bg-dark-900">
+          <span class="text-xs font-bold text-gray-700 dark:text-gray-200 block">审核处理意见</span>
           <el-input
             v-model="auditComment"
             type="textarea"

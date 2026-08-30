@@ -1,10 +1,10 @@
 <template>
-  <div class="article-edit-container p-4 bg-gray-50 min-h-screen">
+  <div class="article-edit-container p-4 bg-gray-50 dark:bg-dark-950 min-h-screen">
     <!-- 顶部操作条 (Sticky) -->
-    <div class="sticky top-0 z-10 bg-white shadow-sm rounded-lg p-3.5 mb-4 flex items-center justify-between border border-gray-100">
+    <div class="sticky top-0 z-10 bg-white dark:bg-dark-900 shadow-sm rounded-lg p-3.5 mb-4 flex items-center justify-between border border-gray-100 dark:border-gray-800">
       <div class="flex items-center gap-3">
         <el-button icon="Back" @click="handleBack">返回列表</el-button>
-        <span class="text-base font-bold text-gray-800">
+        <span class="text-base font-bold text-gray-800 dark:text-gray-100">
           {{ form.id ? '编辑文章' : '撰写新文章' }}
         </span>
         <el-tag v-if="form.status !== undefined" size="small" :type="getStatusTagType(form.status)">
@@ -31,7 +31,7 @@
         <!-- 左侧核心编辑区 (占 3 列) -->
         <div class="xl:col-span-3 space-y-4">
           <!-- 标题输入卡片 -->
-          <el-card shadow="never" class="border-gray-100">
+          <el-card shadow="never" class="border-gray-100 dark:border-gray-800">
             <el-form-item label="文章标题" prop="title" class="mb-0">
               <el-input
                 v-model="form.title"
@@ -44,7 +44,7 @@
           </el-card>
 
           <!-- Markdown 编辑器与浮动大纲卡片 -->
-          <el-card shadow="never" class="border-gray-100">
+          <el-card shadow="never" class="border-gray-100 dark:border-gray-800">
             <div class="flex flex-col lg:flex-row gap-4">
               <!-- Markdown 核心编辑器组件 -->
               <div class="flex-1 min-w-0">
@@ -67,9 +67,9 @@
           </el-card>
 
           <!-- 摘要卡片 -->
-          <el-card shadow="never" class="border-gray-100">
+          <el-card shadow="never" class="border-gray-100 dark:border-gray-800">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-700">文章摘要</span>
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-200">文章摘要</span>
               <el-button link type="primary" size="small" @click="handleAutoSummary">从正文自动提取</el-button>
             </div>
             <el-form-item prop="summary" class="mb-0">
@@ -88,9 +88,9 @@
         <!-- 右侧元数据配置侧边栏 (占 1 列) -->
         <div class="xl:col-span-1 space-y-4">
           <!-- 分类与封面 -->
-          <el-card shadow="never" class="border-gray-100">
+          <el-card shadow="never" class="border-gray-100 dark:border-gray-800">
             <template #header>
-              <span class="font-bold text-gray-800 text-sm">发布属性配置</span>
+              <span class="font-bold text-gray-800 dark:text-gray-100 text-sm">发布属性配置</span>
             </template>
 
             <el-form-item label="所属分类" prop="categoryId">
@@ -108,7 +108,7 @@
             <el-form-item label="文章封面" prop="coverImage">
               <div class="w-full">
                 <div v-if="form.coverImage" class="relative group mb-2">
-                  <img :src="form.coverImage" class="w-full h-36 object-cover rounded-lg border border-gray-200" />
+                  <img :src="form.coverImage" class="w-full h-36 object-cover rounded-lg border border-gray-200 dark:border-gray-700" />
                   <div
                     class="absolute inset-0 bg-black/40 rounded-lg opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity"
                   >
@@ -121,9 +121,9 @@
                   :http-request="customUploadCover"
                   class="w-full"
                 >
-                  <div class="w-full h-32 border-2 border-dashed border-gray-200 hover:border-primary rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors bg-gray-50/50">
+                  <div class="w-full h-32 border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-primary dark:hover:border-primary rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors bg-gray-50/50 dark:bg-dark-800/50">
                     <el-icon class="text-2xl text-gray-400"><Plus /></el-icon>
-                    <span class="text-xs text-gray-500 mt-1">上传封面图片</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">上传封面图片</span>
                   </div>
                 </el-upload>
               </div>
@@ -139,24 +139,24 @@
           </el-card>
 
           <!-- 运营开关配置 -->
-          <el-card shadow="never" class="border-gray-100">
+          <el-card shadow="never" class="border-gray-100 dark:border-gray-800">
             <template #header>
-              <span class="font-bold text-gray-800 text-sm">运营与来源</span>
+              <span class="font-bold text-gray-800 dark:text-gray-100 text-sm">运营与来源</span>
             </template>
 
             <div class="space-y-3">
               <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-700">置顶文章</span>
+                <span class="text-sm text-gray-700 dark:text-gray-200">置顶文章</span>
                 <el-switch v-model="form.isTop" :active-value="1" :inactive-value="0" />
               </div>
 
               <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-700">推荐文章</span>
+                <span class="text-sm text-gray-700 dark:text-gray-200">推荐文章</span>
                 <el-switch v-model="form.isRecommend" :active-value="1" :inactive-value="0" />
               </div>
 
               <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-700">允许评论</span>
+                <span class="text-sm text-gray-700 dark:text-gray-200">允许评论</span>
                 <el-switch v-model="form.allowComment" :active-value="1" :inactive-value="0" />
               </div>
 

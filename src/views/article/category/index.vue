@@ -1,6 +1,6 @@
 <template>
   <div class="category-management-container p-4">
-    <el-card shadow="never" class="border-gray-100">
+    <el-card shadow="never" class="border-gray-100 dark:border-gray-800">
       <!-- 搜索栏 -->
       <el-form :model="queryParams" inline class="mb-2">
         <el-form-item label="分类名称">
@@ -42,7 +42,7 @@
       >
         <el-table-column prop="name" label="分类名称" min-width="200">
           <template #default="{ row }">
-            <span class="font-medium text-gray-800">{{ row.name }}</span>
+            <span class="font-medium text-gray-800 dark:text-gray-200">{{ row.name }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="slug" label="别名 / Slug" min-width="140" align="center">
