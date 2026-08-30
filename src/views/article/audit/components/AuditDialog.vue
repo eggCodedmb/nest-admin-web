@@ -79,7 +79,7 @@
           <img :src="article?.coverImage" class="w-full h-full object-cover" />
         </div>
 
-        <!-- Markdown 正文排版 -->
+        <!-- Markdown 正文排版 (纯预览模式，无编辑框与工具栏) -->
         <div class="article-body-wrapper bg-white dark:bg-dark-900 p-6 lg:p-8 rounded-2xl border border-gray-200/60 dark:border-gray-800 shadow-sm">
           <MarkdownEditor
             editor-id="audit-markdown-view"
@@ -92,62 +92,55 @@
 
       <!-- 2. 右侧：现代化控制台 (Right Inspector Console - 32%) -->
       <aside class="w-full lg:w-88 xl:w-96 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-gray-200/70 dark:border-gray-800 lg:pl-6 pt-4 lg:pt-0">
-        <!-- 顶部 Tab：大纲与审核记录 -->
+        <!-- 顶部 Tab 切换：采用规范的 Element Plus el-tabs，原生 100% 适配暗黑模式 -->
         <div class="flex-1 overflow-hidden flex flex-col min-h-0">
-          <div class="segmented-control flex items-center p-1 bg-gray-100 dark:bg-dark-800 rounded-xl mb-3">
-            <button
-              class="flex-1 py-1.5 text-xs font-medium rounded-lg transition-all"
-              :class="rightTab === 'toc' ? 'bg-white dark:bg-dark-900 text-primary shadow-sm' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'"
-              @click="rightTab = 'toc'"
-            >
-              章节大纲 (TOC)
-            </button>
-            <button
-              class="flex-1 py-1.5 text-xs font-medium rounded-lg transition-all"
-              :class="rightTab === 'logs' ? 'bg-white dark:bg-dark-900 text-primary shadow-sm' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'"
-              @click="rightTab = 'logs'"
-            >
-              审核轨迹 ({{ auditLogs.length }})
-            </button>
-          </div>
-
-          <!-- 选项卡 1：章节大纲 -->
-          <div v-show="rightTab === 'toc'" class="flex-1 overflow-hidden">
-            <ArticleToc editor-id="audit-markdown-view" max-height="340px" />
-          </div>
-
-          <!-- 选项卡 2：审核历史时间线 -->
-          <div v-show="rightTab === 'logs'" class="flex-1 overflow-hidden">
-            <el-scrollbar max-height="340px" class="pr-2">
-              <div v-if="auditLogs.length === 0" class="text-xs text-gray-400 dark:text-gray-500 text-center py-10">
-                暂无历史流转记录
+          <el-tabs v-model="rightTab" class="audit-inspector-tabs w-full flex-1 flex flex-col min-h-0" stretch>
+            <!-- 选项卡 1：章节大纲 -->
+            <el-tab-pane label="章节大纲 (TOC)" name="toc" class="h-full overflow-hidden">
+              <div class="pt-1 h-full">
+                <ArticleToc
+                  editor-id="audit-markdown-view"
+                  scroll-element="#audit-reader-scroll-wrapper"
+                  max-height="340px"
+                />
               </div>
-              <el-timeline v-else class="pt-2">
-                <el-timeline-item
-                  v-for="log in auditLogs"
-                  :key="log.id"
-                  :timestamp="log.createdAt"
-                  :type="log.auditResult === 1 ? 'success' : 'danger'"
-                  size="small"
-                >
-                  <div class="text-xs space-y-1">
-                    <div class="flex items-center gap-1.5">
-                      <span class="font-bold text-gray-800 dark:text-gray-200">{{ log.auditorName }}</span>
-                      <el-tag size="small" :type="log.auditResult === 1 ? 'success' : 'danger'" class="rounded-full">
-                        {{ log.auditResult === 1 ? '审核通过' : '审核驳回' }}
-                      </el-tag>
-                    </div>
-                    <div
-                      v-if="log.auditComment"
-                      class="text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-dark-800/80 p-2 rounded-lg border border-gray-100 dark:border-gray-700/60"
-                    >
-                      {{ log.auditComment }}
-                    </div>
+            </el-tab-pane>
+
+            <!-- 选项卡 2：审核历史时间线 -->
+            <el-tab-pane :label="`审核轨迹 (${auditLogs.length})`" name="logs" class="h-full overflow-hidden">
+              <div class="pt-1 h-full">
+                <el-scrollbar max-height="340px" class="pr-2">
+                  <div v-if="auditLogs.length === 0" class="text-xs text-gray-400 dark:text-gray-500 text-center py-10">
+                    暂无历史流转记录
                   </div>
-                </el-timeline-item>
-              </el-timeline>
-            </el-scrollbar>
-          </div>
+                  <el-timeline v-else class="pt-2">
+                    <el-timeline-item
+                      v-for="log in auditLogs"
+                      :key="log.id"
+                      :timestamp="log.createdAt"
+                      :type="log.auditResult === 1 ? 'success' : 'danger'"
+                      size="small"
+                    >
+                      <div class="text-xs space-y-1">
+                        <div class="flex items-center gap-1.5">
+                          <span class="font-bold text-gray-800 dark:text-gray-200">{{ log.auditorName }}</span>
+                          <el-tag size="small" :type="log.auditResult === 1 ? 'success' : 'danger'" class="rounded-full">
+                            {{ log.auditResult === 1 ? '审核通过' : '审核驳回' }}
+                          </el-tag>
+                        </div>
+                        <div
+                          v-if="log.auditComment"
+                          class="text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-dark-800/80 p-2 rounded-lg border border-gray-100 dark:border-gray-700/60"
+                        >
+                          {{ log.auditComment }}
+                        </div>
+                      </div>
+                    </el-timeline-item>
+                  </el-timeline>
+                </el-scrollbar>
+              </div>
+            </el-tab-pane>
+          </el-tabs>
         </div>
 
         <!-- 底部：决策与处理控制区 (Decision Hub) -->
@@ -157,17 +150,19 @@
             <span class="text-[11px] text-gray-400">驳回时意见必填</span>
           </div>
 
-          <!-- 常用快捷批注 Tag 气泡 -->
+          <!-- 常用快捷批注 Tag 气泡 (Element Plus Tag 原生适配深色) -->
           <div class="quick-tags flex flex-wrap gap-1.5">
-            <button
+            <el-tag
               v-for="tag in presetComments"
               :key="tag"
-              type="button"
-              class="px-2 py-0.5 rounded-full text-[11px] bg-gray-100 dark:bg-dark-800 text-gray-600 dark:text-gray-300 hover:bg-primary/10 hover:text-primary transition-colors border border-transparent hover:border-primary/30"
+              size="small"
+              class="cursor-pointer hover:scale-105 transition-transform select-none"
+              type="info"
+              effect="plain"
               @click="applyPresetComment(tag)"
             >
               + {{ tag }}
-            </button>
+            </el-tag>
           </div>
 
           <!-- 批注输入框 -->
@@ -307,6 +302,9 @@ defineExpose({
 }
 :deep(.modern-audit-dialog .el-dialog__body) {
   padding: 20px 24px;
+}
+:deep(.audit-inspector-tabs .el-tabs__header) {
+  margin-bottom: 8px;
 }
 .summary-quote {
   border-left-width: 4px;
