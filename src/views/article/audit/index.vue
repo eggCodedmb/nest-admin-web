@@ -1,7 +1,7 @@
 <template>
-  <div class="article-audit-container p-4">
+  <div class="article-audit-container">
     <!-- 顶部状态切换 Tabs -->
-    <div class="bg-white dark:bg-dark-900 rounded-t-xl border border-b-0 border-gray-200/70 dark:border-gray-800 p-3 pb-0">
+    <div class="bg-white dark:bg-dark-900 rounded-lg border border-gray-200/70 dark:border-gray-800 p-3 pb-0 mb-4">
       <el-tabs
         v-model="activeStatusTab"
         type="card"

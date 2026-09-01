@@ -1,14 +1,21 @@
 <template>
-  <div class="article-management-container p-4">
+  <div class="article-management-container">
     <!-- 状态筛选 Tabs -->
-    <el-tabs v-model="activeTab" type="card" class="bg-white dark:bg-dark-900 px-4 pt-3 rounded-t-lg border-b-0 dark:border-gray-800" @tab-change="handleTabChange">
-      <el-tab-pane label="全部文章" name="all" />
-      <el-tab-pane label="草稿箱" name="draft" />
-      <el-tab-pane label="待审核" name="pending" />
-      <el-tab-pane label="已发布" name="published" />
-      <el-tab-pane label="已驳回" name="rejected" />
-      <el-tab-pane label="已下架" name="offline" />
-    </el-tabs>
+    <div class="bg-white dark:bg-dark-900 rounded-lg border border-gray-200/70 dark:border-gray-800 p-3 pb-0 mb-4">
+      <el-tabs
+        v-model="activeTab"
+        type="card"
+        class="article-status-tabs"
+        @tab-change="handleTabChange"
+      >
+        <el-tab-pane label="全部文章" name="all" />
+        <el-tab-pane label="草稿箱" name="draft" />
+        <el-tab-pane label="待审核" name="pending" />
+        <el-tab-pane label="已发布" name="published" />
+        <el-tab-pane label="已驳回" name="rejected" />
+        <el-tab-pane label="已下架" name="offline" />
+      </el-tabs>
+    </div>
 
     <ProTable
       ref="tableRef"
@@ -59,9 +66,20 @@
 
       <!-- 头部操作按钮 -->
       <template #tableHeader>
-        <el-button type="primary" icon="Plus" v-hasPermi="['article:post:create']" @click="handleWrite">
-          写新文章
-        </el-button>
+        <div class="flex items-center gap-2">
+          <el-button type="primary" icon="Plus" v-hasPermi="['article:post:create']" @click="handleWrite">
+            写新文章
+          </el-button>
+          <el-button
+            type="warning"
+            plain
+            icon="TrendCharts"
+            v-hasPermi="['article:recommend:list']"
+            @click="router.push('/article/recommend')"
+          >
+            推荐算法控制中心
+          </el-button>
+        </div>
       </template>
 
       <!-- 文章标题与封面 -->
@@ -75,9 +93,15 @@
             preview-teleported
           />
           <div class="flex flex-col min-w-0">
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-1.5 flex-wrap">
               <el-tag v-if="row.isTop === 1" size="small" type="danger" effect="dark">置顶</el-tag>
-              <el-tag v-if="row.isRecommend === 1" size="small" type="warning" effect="plain">推荐</el-tag>
+              <el-tag v-if="row.isRecommend === 1" size="small" type="warning" effect="plain">精选</el-tag>
+              <el-tag v-if="row.recommendFactor === 1" size="small" type="success" effect="light">强推</el-tag>
+              <el-tag v-else-if="row.recommendFactor === 2" size="small" type="danger" effect="light">禁推</el-tag>
+              <el-tag v-else-if="row.recommendFactor === 3" size="small" type="warning" effect="light">冷启动</el-tag>
+              <el-tag v-if="row.recommendWeight" size="small" type="primary" effect="plain">
+                加权 {{ row.recommendWeight > 0 ? '+' : '' }}{{ row.recommendWeight }}
+              </el-tag>
               <span class="font-medium text-gray-900 dark:text-gray-100 truncate hover:text-primary dark:hover:text-primary cursor-pointer" @click="handleEdit(row)">
                 {{ row.title }}
               </span>
@@ -86,6 +110,22 @@
               {{ row.summary }}
             </span>
           </div>
+        </div>
+      </template>
+
+      <!-- 推荐算法干预列 -->
+      <template #recommendControl="{ row }">
+        <div class="flex items-center justify-center gap-1 cursor-pointer" @click="handleOpenRecommendDialog(row)">
+          <el-tag v-if="row.recommendFactor === 2" type="danger" size="small">算法屏蔽</el-tag>
+          <el-tag v-else-if="row.recommendFactor === 1" type="success" size="small">
+            强推 ({{ row.recommendWeight > 0 ? '+' : '' }}{{ row.recommendWeight || 0 }})
+          </el-tag>
+          <el-tag v-else-if="row.recommendWeight" type="primary" size="small">
+            微调 {{ row.recommendWeight > 0 ? '+' : '' }}{{ row.recommendWeight }}
+          </el-tag>
+          <el-tag v-else-if="row.isRecommend === 1" type="warning" size="small">精选</el-tag>
+          <span v-else class="text-xs text-gray-400 hover:text-primary">自然流</span>
+          <el-icon class="text-xs text-gray-400 hover:text-primary ml-0.5"><EditPen /></el-icon>
         </div>
       </template>
 
@@ -149,6 +189,70 @@
         </div>
       </template>
     </ProTable>
+
+    <!-- 文章推荐算法干预快捷弹窗 -->
+    <el-dialog
+      v-model="recommendDialogVisible"
+      title="推荐算法干预设置"
+      width="460px"
+      destroy-on-close
+    >
+      <el-form :model="recommendForm" label-position="top" class="space-y-4">
+        <div class="p-3 bg-gray-50 dark:bg-dark-800/60 rounded-lg text-xs text-gray-600 dark:text-gray-300">
+          <span class="font-bold block text-gray-800 dark:text-gray-100 mb-1">文章标题：</span>
+          <span class="line-clamp-1">{{ currentArticle?.title }}</span>
+        </div>
+
+        <el-form-item label="干预模式">
+          <el-radio-group v-model="recommendForm.recommendFactor" class="w-full">
+            <el-radio-button :value="0">自然流</el-radio-button>
+            <el-radio-button :value="1">强推</el-radio-button>
+            <el-radio-button :value="2">禁推(屏蔽)</el-radio-button>
+            <el-radio-button :value="3">冷启动</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+
+        <el-form-item label="推荐权重微调 (-100 ~ +100)">
+          <div class="w-full space-y-1">
+            <div class="flex justify-between text-xs text-gray-400">
+              <span>负值降权</span>
+              <span class="font-mono font-bold text-primary">{{ recommendForm.recommendWeight }} 分</span>
+              <span>正值提权</span>
+            </div>
+            <el-slider
+              v-model="recommendForm.recommendWeight"
+              :min="-100"
+              :max="100"
+              :step="5"
+              show-stops
+            />
+          </div>
+        </el-form-item>
+
+        <el-form-item label="精选推荐标记 (isRecommend)">
+          <el-switch v-model="recommendForm.isRecommend" :active-value="1" :inactive-value="0" />
+        </el-form-item>
+
+        <el-form-item label="推荐干预截止时间 (留空表示永久有效)">
+          <el-date-picker
+            v-model="recommendForm.recommendExpireAt"
+            type="datetime"
+            placeholder="选择截止时间"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            class="w-full"
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <el-button @click="recommendDialogVisible = false">取消</el-button>
+          <el-button type="primary" :loading="recommendSaveLoading" @click="handleSaveRecommendControl">
+            保存干预
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -156,6 +260,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { TrendCharts, EditPen } from '@element-plus/icons-vue';
 import ProTable, { ColumnProps } from '@/components/ProTable/index.vue';
 import { useDict } from '@/hooks/useDict';
 import {
@@ -164,6 +269,7 @@ import {
   submitArticleAudit,
   updateArticleStatus,
 } from '@/api/article/post';
+import { updateArticleRecommendControl } from '@/api/article/recommend';
 import { getCategoryTree } from '@/api/article/category';
 import type { ArticleEntity } from '@/types/article';
 
@@ -180,6 +286,7 @@ const queryParams = reactive({
   categoryId: undefined as number | undefined,
   status: undefined as number | undefined,
   isTop: undefined as number | undefined,
+  recommendFactor: undefined as number | undefined,
 });
 
 const columns: ColumnProps[] = [
@@ -188,11 +295,49 @@ const columns: ColumnProps[] = [
   { prop: 'categoryName', label: '所属分类', minWidth: 120, align: 'center' },
   { prop: 'authorName', label: '作者', width: 100, align: 'center' },
   { prop: 'status', label: '状态', width: 100, dictOptions: art_post_status, align: 'center' },
+  { prop: 'recommendControl', label: '推荐算法控制', width: 140, slot: 'recommendControl', align: 'center' },
   { prop: 'isTop', label: '置顶', width: 80, slot: 'isTop', align: 'center' },
   { prop: 'viewCount', label: '阅读量', width: 80, align: 'center' },
   { prop: 'publishedAt', label: '发布时间', width: 170, align: 'center' },
   { prop: 'action', label: '操作', width: 200, slot: 'action', align: 'center', fixed: 'right' },
 ];
+
+const recommendDialogVisible = ref(false);
+const recommendSaveLoading = ref(false);
+const currentArticle = ref<ArticleEntity | null>(null);
+const recommendForm = reactive({
+  recommendFactor: 0,
+  recommendWeight: 0,
+  isRecommend: 0,
+  recommendExpireAt: '' as string | null,
+});
+
+const handleOpenRecommendDialog = (row: ArticleEntity) => {
+  currentArticle.value = row;
+  recommendForm.recommendFactor = row.recommendFactor ?? 0;
+  recommendForm.recommendWeight = row.recommendWeight ?? 0;
+  recommendForm.isRecommend = row.isRecommend ?? 0;
+  recommendForm.recommendExpireAt = (row.recommendExpireAt as string) || null;
+  recommendDialogVisible.value = true;
+};
+
+const handleSaveRecommendControl = async () => {
+  if (!currentArticle.value) return;
+  recommendSaveLoading.value = true;
+  try {
+    await updateArticleRecommendControl(currentArticle.value.id, {
+      recommendFactor: recommendForm.recommendFactor,
+      recommendWeight: recommendForm.recommendWeight,
+      isRecommend: recommendForm.isRecommend,
+      recommendExpireAt: recommendForm.recommendExpireAt || null,
+    });
+    ElMessage.success('推荐算法干预已保存');
+    recommendDialogVisible.value = false;
+    tableRef.value?.getTableList();
+  } finally {
+    recommendSaveLoading.value = false;
+  }
+};
 
 const loadCategories = async () => {
   const res: any = await getCategoryTree();
@@ -278,7 +423,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-:deep(.el-tabs__header) {
+:deep(.article-status-tabs .el-tabs__header) {
   margin-bottom: 0;
+  border-bottom: none;
 }
 </style>

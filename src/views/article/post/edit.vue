@@ -1,5 +1,5 @@
 <template>
-  <div class="article-editor-page min-h-screen bg-gray-50/60 dark:bg-dark-950 flex flex-col">
+  <div class="article-editor-page -m-4 min-h-[calc(100vh-84px)] bg-gray-50/60 dark:bg-dark-950 flex flex-col">
     <!-- 1. 顶部极简毛玻璃导航栏 (Zen Navbar) -->
     <header class="zen-header sticky top-0 z-30 backdrop-blur-md bg-white/85 dark:bg-dark-900/85 border-b border-gray-200/70 dark:border-gray-800/80 px-4 lg:px-8 py-2.5 transition-all">
       <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
@@ -282,6 +282,40 @@
           </div>
         </div>
 
+        <!-- 5.1 推荐算法控制与微调 -->
+        <div class="space-y-3 bg-gray-50 dark:bg-dark-800/60 p-3.5 rounded-xl border border-gray-100 dark:border-gray-800">
+          <span class="text-xs font-bold text-gray-700 dark:text-gray-300 block">推荐算法控制</span>
+
+          <div class="space-y-1">
+            <span class="text-xs text-gray-600 dark:text-gray-400">干预模式</span>
+            <el-select v-model="form.recommendFactor" class="w-full">
+              <el-option label="0 自然算法流" :value="0" />
+              <el-option label="1 强制强推" :value="1" />
+              <el-option label="2 算法屏蔽 (禁推)" :value="2" />
+              <el-option label="3 强制冷启动扶持" :value="3" />
+            </el-select>
+          </div>
+
+          <div class="space-y-1 pt-1">
+            <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+              <span>推荐权重微调 (-100 ~ +100)</span>
+              <span class="font-mono font-bold text-primary">{{ form.recommendWeight }} 分</span>
+            </div>
+            <el-slider v-model="form.recommendWeight" :min="-100" :max="100" :step="5" show-stops />
+          </div>
+
+          <div class="space-y-1 pt-1">
+            <span class="text-xs text-gray-600 dark:text-gray-400">推荐干预截止时间</span>
+            <el-date-picker
+              v-model="form.recommendExpireAt"
+              type="datetime"
+              placeholder="留空表示永久有效"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              class="w-full"
+            />
+          </div>
+        </div>
+
         <!-- 6. 来源类型 -->
         <div class="space-y-2 pt-1">
           <span class="text-xs font-medium text-gray-700 dark:text-gray-300 block">内容来源</span>
@@ -359,6 +393,9 @@ const form = reactive({
   slug: '',
   isTop: 0,
   isRecommend: 0,
+  recommendWeight: 0,
+  recommendFactor: 0,
+  recommendExpireAt: '' as string | null,
   allowComment: 1,
   sourceType: 1,
   sourceUrl: '',
@@ -440,6 +477,9 @@ const loadArticleDetail = async (id: number) => {
     slug: res.slug || '',
     isTop: res.isTop ?? 0,
     isRecommend: res.isRecommend ?? 0,
+    recommendWeight: res.recommendWeight ?? 0,
+    recommendFactor: res.recommendFactor ?? 0,
+    recommendExpireAt: res.recommendExpireAt || null,
     allowComment: res.allowComment ?? 1,
     sourceType: res.sourceType ?? 1,
     sourceUrl: res.sourceUrl || '',
@@ -489,6 +529,9 @@ const buildSubmitPayload = (customStatus?: number) => {
     slug: form.slug || '',
     isTop: Number(form.isTop ?? 0),
     isRecommend: Number(form.isRecommend ?? 0),
+    recommendWeight: Number(form.recommendWeight ?? 0),
+    recommendFactor: Number(form.recommendFactor ?? 0),
+    recommendExpireAt: form.recommendExpireAt || null,
     allowComment: Number(form.allowComment ?? 1),
     sourceType: Number(form.sourceType ?? 1),
     sourceUrl: form.sourceUrl || '',

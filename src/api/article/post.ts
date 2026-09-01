@@ -10,6 +10,7 @@ export function getArticleList(params?: {
   status?: number;
   isTop?: number;
   isRecommend?: number;
+  recommendFactor?: number;
   authorId?: number;
 }) {
   return request<any, PageResult<ArticleEntity>>({
@@ -51,7 +52,14 @@ export function submitArticleAudit(id: number | string) {
 
 export function updateArticleStatus(
   id: number | string,
-  data: { status?: number; isTop?: number; isRecommend?: number },
+  data: {
+    status?: number;
+    isTop?: number;
+    isRecommend?: number;
+    recommendWeight?: number;
+    recommendFactor?: number;
+    recommendExpireAt?: string | null;
+  },
 ) {
   return request<any, ArticleEntity>({
     url: `/article/post/${id}/status`,

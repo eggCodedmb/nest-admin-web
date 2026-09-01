@@ -1,5 +1,5 @@
 <template>
-  <div class="category-management-container p-4">
+  <div class="category-management-container">
     <el-card shadow="never" class="border-gray-100 dark:border-gray-800">
       <!-- 搜索栏 -->
       <el-form :model="queryParams" inline class="mb-2">
