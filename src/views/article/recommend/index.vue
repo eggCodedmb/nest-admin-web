@@ -97,8 +97,9 @@
                   :class="currentPreset === tpl.type ? 'border-primary ring-1 ring-primary/20' : 'border-gray-200/80 dark:border-gray-700'"
                   @click="applyPresetTemplate(tpl)"
                 >
-                  <div class="flex items-center justify-between text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-primary">
-                    <span>{{ tpl.icon }} {{ tpl.name }}</span>
+                  <div class="flex items-center gap-1.5 text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-primary">
+                    <el-icon :size="14" class="text-primary"><component :is="tpl.iconComponent" /></el-icon>
+                    <span>{{ tpl.name }}</span>
                   </div>
                   <p class="text-[11px] text-gray-400 mt-1 line-clamp-1">{{ tpl.desc }}</p>
                 </div>
@@ -109,7 +110,13 @@
             <el-form label-position="top" class="space-y-4">
               <!-- 1. 基础互动权重因子 -->
               <el-collapse v-model="activeCollapse" class="custom-collapse">
-                <el-collapse-item title="📈 互动权重因子 (Engagement Weights)" name="interaction">
+                <el-collapse-item name="interaction">
+                  <template #title>
+                    <div class="flex items-center gap-2">
+                      <el-icon class="text-primary"><Histogram /></el-icon>
+                      <span>互动权重因子 (Engagement Weights)</span>
+                    </div>
+                  </template>
                   <div class="space-y-3 px-1 pt-1">
                     <div>
                       <div class="flex justify-between text-xs text-gray-600 dark:text-gray-300 mb-1">
@@ -138,7 +145,13 @@
                 </el-collapse-item>
 
                 <!-- 2. 时效衰减与半衰期 -->
-                <el-collapse-item title="⏳ 时效重力衰减 (Time Decay & Gravity)" name="decay">
+                <el-collapse-item name="decay">
+                  <template #title>
+                    <div class="flex items-center gap-2">
+                      <el-icon class="text-primary"><Timer /></el-icon>
+                      <span>时效重力衰减 (Time Decay & Gravity)</span>
+                    </div>
+                  </template>
                   <div class="space-y-3 px-1 pt-1">
                     <div>
                       <div class="flex justify-between text-xs text-gray-600 dark:text-gray-300 mb-1">
@@ -162,7 +175,13 @@
                 </el-collapse-item>
 
                 <!-- 3. 内容与标签相关度 -->
-                <el-collapse-item title="🎯 分类与标签协同相关度 (Relevance)" name="relevance">
+                <el-collapse-item name="relevance">
+                  <template #title>
+                    <div class="flex items-center gap-2">
+                      <el-icon class="text-primary"><Aim /></el-icon>
+                      <span>分类与标签协同相关度 (Relevance)</span>
+                    </div>
+                  </template>
                   <div class="space-y-3 px-1 pt-1">
                     <div>
                       <div class="flex justify-between text-xs text-gray-600 dark:text-gray-300 mb-1">
@@ -183,7 +202,13 @@
                 </el-collapse-item>
 
                 <!-- 4. 人工提权与新文冷启动扶持 -->
-                <el-collapse-item title="🚀 人工置顶提权 & 新文冷启动扶持 (Cold Start & Ops)" name="coldstart">
+                <el-collapse-item name="coldstart">
+                  <template #title>
+                    <div class="flex items-center gap-2">
+                      <el-icon class="text-primary"><Opportunity /></el-icon>
+                      <span>人工置顶提权 & 新文冷启动扶持 (Cold Start & Ops)</span>
+                    </div>
+                  </template>
                   <div class="space-y-3 px-1 pt-1">
                     <div>
                       <div class="flex justify-between text-xs text-gray-600 dark:text-gray-300 mb-1">
@@ -241,7 +266,13 @@
                 </el-collapse-item>
 
                 <!-- 5. 多样性打散与探索 -->
-                <el-collapse-item title="🧩 多样性打散与探索率 (Diversity & Explore)" name="diversity">
+                <el-collapse-item name="diversity">
+                  <template #title>
+                    <div class="flex items-center gap-2">
+                      <el-icon class="text-primary"><Grid /></el-icon>
+                      <span>多样性打散与探索率 (Diversity & Explore)</span>
+                    </div>
+                  </template>
                   <div class="space-y-3 px-1 pt-1">
                     <div>
                       <div class="flex justify-between text-xs text-gray-600 dark:text-gray-300 mb-1">
@@ -273,8 +304,9 @@
           <div class="lg:col-span-7 space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-50/90 dark:bg-dark-800/60 rounded-xl border border-gray-200/60 dark:border-gray-800">
               <div class="flex items-center gap-2">
+                <el-icon class="text-primary"><DataAnalysis /></el-icon>
                 <span class="text-xs font-bold text-gray-800 dark:text-gray-200">
-                  🎯 推荐候选文章实时试算排序
+                  推荐候选文章实时试算排序
                 </span>
                 <span class="text-xs text-gray-400">
                   (候选池 {{ simulateResult.totalCandidates }} 篇，展示 Top {{ simulateResult.recommendedCount }})
@@ -338,8 +370,8 @@
                     <div class="flex items-center gap-3 text-[11px] text-gray-400 mt-1">
                       <span>分类: {{ item.categoryName }}</span>
                       <span>作者: {{ item.authorName }}</span>
-                      <span>👁 {{ item.viewCount }}</span>
-                      <span>👍 {{ item.likeCount }}</span>
+                      <span class="inline-flex items-center gap-0.5"><el-icon><View /></el-icon> {{ item.viewCount }}</span>
+                      <span class="inline-flex items-center gap-0.5"><el-icon><Pointer /></el-icon> {{ item.likeCount }}</span>
                     </div>
                   </div>
                 </div>
@@ -350,13 +382,13 @@
                   <el-tooltip placement="top" :show-after="100">
                     <template #content>
                       <div class="text-xs space-y-1 py-1">
-                        <div class="font-bold text-amber-300">📊 推荐得分组成拆解：</div>
+                        <div class="font-bold text-amber-300">推荐得分组成拆解：</div>
                         <div>· 互动基础分：{{ item.scoreBreakdown.interactionScore }} (阅:{{ item.scoreBreakdown.viewComponent }} + 赞:{{ item.scoreBreakdown.likeComponent }})</div>
                         <div>· 时效衰减率：{{ item.scoreBreakdown.timeDecayFactor }}x (发布 {{ item.scoreBreakdown.hoursSincePublish }} 小时)</div>
                         <div>· 冷启动增益：{{ item.scoreBreakdown.coldStartMultiplier }}x {{ item.scoreBreakdown.isColdStartApplied ? '(扶持中)' : '' }}</div>
                         <div>· 运营提权分：{{ item.scoreBreakdown.manualBoostScore }}</div>
                         <div>· 相关度加成：{{ item.scoreBreakdown.relevanceScore }}</div>
-                        <div class="pt-1 border-t border-gray-600 font-bold">🎯 综合总得分：{{ item.scoreBreakdown.finalScore }}</div>
+                        <div class="pt-1 border-t border-gray-600 font-bold">综合总得分：{{ item.scoreBreakdown.finalScore }}</div>
                       </div>
                     </template>
                     <div class="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 font-mono font-bold text-xs cursor-pointer flex items-center gap-1 border border-amber-200/60 dark:border-amber-900/50">
@@ -548,7 +580,25 @@
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { debounce } from 'lodash-es';
-import { TrendCharts } from '@element-plus/icons-vue';
+import {
+  TrendCharts,
+  Check,
+  DocumentChecked,
+  Plus,
+  Histogram,
+  Timer,
+  Aim,
+  Opportunity,
+  Grid,
+  Refresh,
+  EditPen,
+  Setting,
+  View,
+  Pointer,
+  ScaleToOriginal,
+  ChatDotRound,
+  DataAnalysis,
+} from '@element-plus/icons-vue';
 import ProTable, { ColumnProps } from '@/components/ProTable/index.vue';
 import { getArticleList } from '@/api/article/post';
 import {
@@ -611,12 +661,12 @@ const simulateResult = reactive({
   simulatedList: [] as RecommendedArticleItem[],
 });
 
-// 预设模板
+// 预设模板（使用 Element Plus 图标组件）
 const presetTemplates = [
   {
     type: 'HYBRID',
     name: '综合多因子平衡',
-    icon: '⚖️',
+    iconComponent: ScaleToOriginal,
     desc: '全能平衡各维度指标',
     weights: { viewWeight: 20, likeWeight: 40, commentWeight: 30, timeDecayRate: 1.5, tagMatchWeight: 35, categoryMatchWeight: 30, manualBoostWeight: 50 },
     coldStart: { enableColdStart: true, boostDays: 7, boostScoreMultiplier: 1.6, minImpressionsThreshold: 200 },
@@ -624,7 +674,7 @@ const presetTemplates = [
   {
     type: 'HOT_DECAY',
     name: '热门时效衰减',
-    icon: '🔥',
+    iconComponent: Timer,
     desc: 'Hacker News 重力衰减',
     weights: { viewWeight: 15, likeWeight: 50, commentWeight: 35, timeDecayRate: 1.8, tagMatchWeight: 10, categoryMatchWeight: 10, manualBoostWeight: 30 },
     coldStart: { enableColdStart: false, boostDays: 3, boostScoreMultiplier: 1.2, minImpressionsThreshold: 50 },
@@ -632,7 +682,7 @@ const presetTemplates = [
   {
     type: 'COLD_START',
     name: '新文冷启动保量',
-    icon: '🚀',
+    iconComponent: Opportunity,
     desc: '扶持新发布优质作品',
     weights: { viewWeight: 20, likeWeight: 30, commentWeight: 20, timeDecayRate: 1.0, tagMatchWeight: 40, categoryMatchWeight: 40, manualBoostWeight: 40 },
     coldStart: { enableColdStart: true, boostDays: 14, boostScoreMultiplier: 2.2, minImpressionsThreshold: 500 },
@@ -640,7 +690,7 @@ const presetTemplates = [
   {
     type: 'DEEP_ENGAGEMENT',
     name: '深度互动高粘性',
-    icon: '🎯',
+    iconComponent: ChatDotRound,
     desc: '高权重评论与干货标签',
     weights: { viewWeight: 10, likeWeight: 35, commentWeight: 55, timeDecayRate: 1.2, tagMatchWeight: 45, categoryMatchWeight: 35, manualBoostWeight: 40 },
     coldStart: { enableColdStart: true, boostDays: 10, boostScoreMultiplier: 1.4, minImpressionsThreshold: 200 },
