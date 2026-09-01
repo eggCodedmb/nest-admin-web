@@ -1,22 +1,5 @@
 <template>
   <div class="article-management-container">
-    <!-- 状态筛选 Tabs -->
-    <div class="bg-white dark:bg-dark-900 rounded-lg border border-gray-200/70 dark:border-gray-800 p-3 pb-0 mb-4">
-      <el-tabs
-        v-model="activeTab"
-        type="card"
-        class="article-status-tabs"
-        @tab-change="handleTabChange"
-      >
-        <el-tab-pane label="全部文章" name="all" />
-        <el-tab-pane label="草稿箱" name="draft" />
-        <el-tab-pane label="待审核" name="pending" />
-        <el-tab-pane label="已发布" name="published" />
-        <el-tab-pane label="已驳回" name="rejected" />
-        <el-tab-pane label="已下架" name="offline" />
-      </el-tabs>
-    </div>
-
     <ProTable
       ref="tableRef"
       table-key="art_article_list"
@@ -275,7 +258,6 @@ import type { ArticleEntity } from '@/types/article';
 
 const router = useRouter();
 const tableRef = ref<InstanceType<typeof ProTable>>();
-const activeTab = ref('all');
 const categoryTree = ref<any[]>([]);
 
 // 接入系统字典 art_post_status
@@ -344,19 +326,6 @@ const loadCategories = async () => {
   categoryTree.value = res || [];
 };
 
-const handleTabChange = (tabName: string | number) => {
-  const statusMap: Record<string, number | undefined> = {
-    all: undefined,
-    draft: 0,
-    pending: 1,
-    published: 2,
-    rejected: 3,
-    offline: 4,
-  };
-  queryParams.status = statusMap[tabName as string];
-  tableRef.value?.getTableList();
-};
-
 const handleWrite = () => {
   router.push('/article/post/edit');
 };
@@ -421,10 +390,3 @@ onMounted(() => {
   loadCategories();
 });
 </script>
-
-<style scoped>
-:deep(.article-status-tabs .el-tabs__header) {
-  margin-bottom: 0;
-  border-bottom: none;
-}
-</style>
